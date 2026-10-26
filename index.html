@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Job Radar Jorge</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root {
+  --navy:#1B2A4A; --accent:#2E75B6; --mid:#2D3748; --light:#718096;
+  --bg:#F7F8FA; --surface:#FFFFFF; --border:#E2E8F0;
+  --green:#38A169; --orange:#DD6B20; --red:#E53E3E; --purple:#805AD5; --blue:#3182CE;
+  --radius:10px; --shadow:0 2px 8px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--mid);min-height:100dvh}
+
+/* SIGN-IN */
+#signin-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;gap:24px;padding:24px;text-align:center}
+#signin-screen h1{font-size:1.6rem;color:var(--navy);font-weight:700}
+#signin-screen p{color:var(--light);font-size:.95rem;max-width:320px}
+.signin-btn{background:var(--accent);color:#fff;border:none;padding:14px 32px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .2s}
+.signin-btn:hover{background:var(--navy)}
+.signin-btn svg{width:20px;height:20px;fill:#fff}
+
+/* APP SHELL */
+#app{display:none;flex-direction:column;min-height:100dvh}
+header{background:var(--navy);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+header h1{font-size:1.1rem;font-weight:700;letter-spacing:.3px}
+header small{font-size:.75rem;opacity:.7}
+.header-right{display:flex;align-items:center;gap:12px}
+.signout-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:6px;font-size:.8rem;cursor:pointer}
+
+/* TABS */
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;position:sticky;top:57px;z-index:90}
+.tab{flex:1;min-width:80px;padding:12px 8px;text-align:center;font-size:.85rem;font-weight:500;color:var(--light);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{display:none;padding:16px;max-width:700px;margin:0 auto;width:100%}
+.tab-content.active{display:block}
+
+/* STATS BAR */
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.stat{background:var(--surface);border-radius:8px;padding:10px 14px;flex:1;min-width:80px;text-align:center;box-shadow:var(--shadow)}
+.stat-n{font-size:1.4rem;font-weight:700;color:var(--navy)}
+.stat-l{font-size:.72rem;color:var(--light);margin-top:2px}
+
+/* STATUS PILLS */
+.pill{display:inline-block;padding:2px 9px;border-radius:12px;font-size:.75rem;font-weight:600;white-space:nowrap}
+.pill-pruefen{background:#EBF8FF;color:#2B6CB0}
+.pill-bearbeitung{background:#FFFAF0;color:#C05621}
+.pill-verschickt{background:#F0FFF4;color:#276749}
+.pill-interview{background:#FAF5FF;color:#553C9A}
+.pill-zusage{background:#F0FFF4;color:#22543D}
+.pill-absage{background:#FFF5F5;color:#C53030}
+.pill-verworfen{background:#F7FAFC;color:#718096}
+
+/* GROUP LABELS */
+.group-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--light);margin:20px 0 8px;padding-left:2px}
+.group-label:first-child{margin-top:0}
+
+/* JOB CARD */
+.job-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:box-shadow .15s;border-left:4px solid transparent}
+.job-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.job-card.status-pruefen{border-left-color:#3182CE}
+.job-card.status-bearbeitung{border-left-color:#DD6B20}
+.job-card.status-verschickt{border-left-color:#38A169}
+.job-card.status-interview{border-left-color:#805AD5}
+.job-card.status-zusage{border-left-color:#22543D}
+.job-card.status-absage{border-left-color:#E53E3E}
+.job-card.status-verworfen{border-left-color:#CBD5E0}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.card-firma{font-weight:700;font-size:.95rem;color:var(--navy)}
+.card-meta{font-size:.8rem;color:var(--light);margin-top:3px}
+.card-stelle{font-size:.85rem;color:var(--mid);margin-top:4px}
+.card-bottom{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;overflow-y:auto;padding:16px}
+.modal-bg.open{display:flex;align-items:flex-start;justify-content:center}
+.modal{background:var(--surface);border-radius:14px;width:100%;max-width:520px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:1.05rem;color:var(--navy);font-weight:700}
+.modal-close{background:none;border:none;font-size:1.4rem;color:var(--light);cursor:pointer;line-height:1}
+.modal-body{padding:16px 20px}
+.modal-body.view-mode .form-only{display:none}
+.modal-footer{padding:12px 20px 18px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--border)}
+
+/* FORM */
+.form-row{margin-bottom:12px}
+label{display:block;font-size:.8rem;font-weight:600;color:var(--mid);margin-bottom:5px}
+input,select,textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-size:.9rem;color:var(--mid);background:#fff;outline:none;transition:border-color .15s;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:70px;font-family:inherit}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:400px){.form-grid{grid-template-columns:1fr}}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:7px;font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:background .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--navy)}
+.btn-ghost{background:var(--bg);color:var(--mid);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--border)}
+.btn-danger{background:#FFF5F5;color:#C53030;border:1px solid #FED7D7}
+.btn-danger:hover{background:#FED7D7}
+.btn-sm{padding:5px 10px;font-size:.78rem}
+.btn-icon{background:none;border:none;cursor:pointer;padding:4px;color:var(--light);font-size:1rem}
+.btn-icon:hover{color:var(--mid)}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:20px;background:var(--accent);color:#fff;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 4px 16px rgba(46,117,182,.4);cursor:pointer;border:none;z-index:80;transition:background .2s}
+.fab:hover{background:var(--navy)}
+
+/* DETAIL VIEW */
+.detail-section{margin-bottom:16px}
+.detail-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--light);margin-bottom:4px}
+.detail-value{font-size:.9rem;color:var(--mid)}
+.detail-notiz{background:var(--bg);padding:10px 12px;border-radius:7px;font-size:.88rem;color:var(--mid);line-height:1.5}
+.doc-chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:4px 10px 4px 8px;font-size:.8rem;color:var(--mid);text-decoration:none;margin:3px 4px 3px 0;cursor:pointer}
+.doc-chip:hover{border-color:var(--accent);color:var(--accent)}
+
+/* DOCUMENTS TAB */
+.doc-group{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+.doc-group-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.doc-group-firma{font-weight:700;font-size:.9rem;color:var(--navy)}
+.doc-group-date{font-size:.75rem;color:var(--light)}
+.doc-list{padding:10px 16px;display:flex;flex-wrap:wrap;gap:6px}
+
+/* REPORT TAB */
+.report-header{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:16px}
+.report-header h2{font-size:1rem;color:var(--navy);font-weight:700;margin-bottom:4px}
+.report-header p{font-size:.85rem;color:var(--light)}
+.report-table{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+.report-table table{width:100%;border-collapse:collapse;font-size:.82rem}
+.report-table th{background:var(--navy);color:#fff;padding:10px 12px;text-align:left;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px}
+.report-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.report-table tr:last-child td{border-bottom:none}
+.export-btn{background:var(--navy);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;margin:0 auto}
+.export-btn:hover{background:var(--accent)}
+
+/* STATUS SELECTOR */
+.status-options{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.status-opt{padding:5px 12px;border-radius:12px;font-size:.78rem;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.status-opt.selected{border-color:var(--navy)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--light)}
+.empty-icon{font-size:2.5rem;margin-bottom:12px}
+.empty p{font-size:.9rem;line-height:1.6}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(10px);background:#1A202C;color:#fff;padding:10px 20px;border-radius:8px;font-size:.85rem;opacity:0;transition:all .3s;pointer-events:none;z-index:300;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* SPINNER */
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--light);gap:10px}
+</style>
+</head>
+<body>
+
+<!-- SIGN-IN SCREEN -->
+<div id="signin-screen">
+  <div style="font-size:3rem">🎯</div>
+  <h1>Job Radar</h1>
+  <p>Jorge Aguilar Salas · 2026</p>
+  <button class="signin-btn" id="signinBtn" onclick="requestToken()">
+    <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+    Sign in with Google
+  </button>
+  <p id="signin-error" style="color:var(--red);font-size:.82rem;display:none"></p>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <header>
+    <div>
+      <h1>🎯 Job Radar</h1>
+      <small id="header-subtitle">Jorge Aguilar Salas · 2026</small>
+    </div>
+    <div class="header-right">
+      <button class="signout-btn" onclick="signOut()">Sign out</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('jobs',this)">Jobs</button>
+    <button class="tab" onclick="switchTab('documents',this)">Documents</button>
+    <button class="tab" onclick="switchTab('report',this)">Report</button>
+  </div>
+
+  <!-- JOBS TAB -->
+  <div id="tab-jobs" class="tab-content active">
+    <div class="stats" id="stats-bar"></div>
+    <div id="jobs-list"><div class="loading"><div class="spinner" style="border-top-color:var(--accent)"></div> Loading…</div></div>
+  </div>
+
+  <!-- DOCUMENTS TAB -->
+  <div id="tab-documents" class="tab-content">
+    <div id="docs-list"></div>
+  </div>
+
+  <!-- REPORT TAB -->
+  <div id="tab-report" class="tab-content">
+    <div class="report-header">
+      <h2>Nachweis der Eigenbemühungen</h2>
+      <p>Kundennummer: <strong id="report-kundennr">922D725835</strong> · Jorge Aguilar Salas</p>
+    </div>
+    <div id="report-table-wrap"></div>
+    <button class="export-btn" onclick="exportPDF()">
+      ⬇ PDF herunterladen
+    </button>
+  </div>
+
+  <button class="fab" onclick="openAddModal()" title="Add job">＋</button>
+</div>
+
+<!-- JOB MODAL -->
+<div class="modal-bg" id="job-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Add Job</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ────────────────────────────────────────────────────────────────
+const SPREADSHEET_ID = '1vphtmlNtnpN0f8phSdmwOMa8pG4Eivfl9ryBv9V8HQo';
+const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'; // ← replace after OAuth setup
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+const SHEET = 'Sheet1';
+const COLS = ['id','firma','stelle','ort','modus','quelle','link','weg','sprache','status',
+              'gefundenAm','verschicktAm','datumGeschaetzt','notiz','unterlagen','createdAt','updatedAt'];
+const KUNDENNR = '922D725835';
+const OWNER_NAME = 'Jorge Aguilar Salas';
+
+// ─── STATUS / LABEL MAPS ───────────────────────────────────────────────────
+const STATUS_LABELS = {pruefen:'To Review',bearbeitung:'In Progress',verschickt:'Sent',
+  interview:'Interview',zusage:'Offer ✓',absage:'Rejected',verworfen:'Dismissed'};
+const STATUS_COLORS = {pruefen:'#EBF8FF',bearbeitung:'#FFFAF0',verschickt:'#F0FFF4',
+  interview:'#FAF5FF',zusage:'#F0FFF4',absage:'#FFF5F5',verworfen:'#F7FAFC'};
+const STATUS_TEXT = {pruefen:'#2B6CB0',bearbeitung:'#C05621',verschickt:'#276749',
+  interview:'#553C9A',zusage:'#22543D',absage:'#C53030',verworfen:'#718096'};
+const MODUS_LABELS = {'Remote':'Remote','Hybrid':'Hybrid','Vor Ort':'On-site','':(x)=>x};
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const GROUPS = [
+  {id:'new',   label:'New to Review', statuses:['pruefen']},
+  {id:'active',label:'In Progress',   statuses:['bearbeitung','interview']},
+  {id:'sent',  label:'Active',        statuses:['verschickt']},
+  {id:'closed',label:'Closed',        statuses:['zusage','absage','verworfen']},
+];
+
+// ─── AUTH STATE ────────────────────────────────────────────────────────────
+let tokenClient = null, accessToken = null, tokenExpiry = 0;
+let allJobs = [], editingRowIndex = null;
+
+function initGoogleAuth() {
+  if (CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
+    document.getElementById('signin-error').textContent = 'Please set your Google Client ID first. See setup instructions.';
+    document.getElementById('signin-error').style.display = 'block';
+    return;
+  }
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if (resp.error) { showSigninError(resp.error_description || resp.error); return; }
+      accessToken = resp.access_token;
+      tokenExpiry = Date.now() + (resp.expires_in - 60) * 1000;
+      onSignedIn();
+    }
+  });
+}
+
+function requestToken() {
+  if (!tokenClient) { showSigninError('Auth not ready. Reload the page.'); return; }
+  tokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+async function ensureToken() {
+  if (accessToken && Date.now() < tokenExpiry) return;
+  return new Promise((resolve, reject) => {
+    const origCb = tokenClient.callback;
+    tokenClient.callback = (resp) => {
+      tokenClient.callback = origCb;
+      if (resp.error) { reject(resp); return; }
+      accessToken = resp.access_token;
+      tokenExpiry = Date.now() + (resp.expires_in - 60) * 1000;
+      resolve();
+    };
+    tokenClient.requestAccessToken({ prompt: '' });
+  });
+}
+
+function signOut() {
+  if (accessToken) google.accounts.oauth2.revoke(accessToken, () => {});
+  accessToken = null; tokenExpiry = 0; allJobs = [];
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('signin-screen').style.display = 'flex';
+}
+
+function showSigninError(msg) {
+  const el = document.getElementById('signin-error');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+async function onSignedIn() {
+  document.getElementById('signin-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  await loadJobs();
+}
+
+// ─── SHEETS API ────────────────────────────────────────────────────────────
+async function sheetsGet(range) {
+  await ensureToken();
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(range)}`;
+  const r = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!r.ok) throw new Error(`Sheets GET ${r.status}`);
+  return r.json();
+}
+
+async function sheetsPut(range, values) {
+  await ensureToken();
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+  const r = await fetch(url, { method:'PUT', headers:{ Authorization:`Bearer ${accessToken}`, 'Content-Type':'application/json' }, body:JSON.stringify({ values }) });
+  if (!r.ok) throw new Error(`Sheets PUT ${r.status}`);
+  return r.json();
+}
+
+async function sheetsAppend(range, values) {
+  await ensureToken();
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+  const r = await fetch(url, { method:'POST', headers:{ Authorization:`Bearer ${accessToken}`, 'Content-Type':'application/json' }, body:JSON.stringify({ values }) });
+  if (!r.ok) throw new Error(`Sheets APPEND ${r.status}`);
+  return r.json();
+}
+
+async function sheetsClear(range) {
+  await ensureToken();
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(range)}:clear`;
+  const r = await fetch(url, { method:'POST', headers:{ Authorization:`Bearer ${accessToken}`, 'Content-Type':'application/json' } });
+  if (!r.ok) throw new Error(`Sheets CLEAR ${r.status}`);
+  return r.json();
+}
+
+// ─── DATA HELPERS ──────────────────────────────────────────────────────────
+function rowToObj(row, rowIndex) {
+  const obj = { _row: rowIndex };
+  COLS.forEach((c, i) => { obj[c] = row[i] !== undefined ? String(row[i]) : ''; });
+  try { obj.unterlagen = JSON.parse(obj.unterlagen || '[]'); } catch { obj.unterlagen = []; }
+  obj.datumGeschaetzt = obj.datumGeschaetzt === 'TRUE';
+  return obj;
+}
+
+function objToRow(data) {
+  return COLS.map(c => {
+    if (c === 'unterlagen') return JSON.stringify(Array.isArray(data[c]) ? data[c] : []);
+    if (c === 'datumGeschaetzt') return data[c] ? 'TRUE' : 'FALSE';
+    return data[c] !== undefined ? String(data[c]) : '';
+  });
+}
+
+function slug(text) {
+  return text.toLowerCase()
+    .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
+    .replace(/&/g,'-and-').replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+}
+
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function nowISO() { return new Date().toISOString(); }
+
+// ─── LOAD & RENDER ─────────────────────────────────────────────────────────
+async function loadJobs() {
+  try {
+    const data = await sheetsGet(`${SHEET}!A:Q`);
+    if (!data.values || data.values.length < 2) { allJobs = []; }
+    else {
+      allJobs = data.values.slice(1)
+        .map((row, i) => rowToObj(row, i + 2))
+        .filter(j => j.id && j.status !== 'deleted' && j.status !== '');
+    }
+    renderAll();
+  } catch(e) {
+    showToast('Error loading data: ' + e.message);
+  }
+}
+
+function renderAll() {
+  renderStats(); renderJobs(); renderDocuments(); renderReport();
+}
+
+function renderStats() {
+  const counts = {};
+  allJobs.forEach(j => { counts[j.status] = (counts[j.status]||0)+1; });
+  const el = document.getElementById('stats-bar');
+  el.innerHTML = `
+    <div class="stat"><div class="stat-n">${allJobs.length}</div><div class="stat-l">Total</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--blue)">${counts.pruefen||0}</div><div class="stat-l">To Review</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--orange)">${(counts.bearbeitung||0)+(counts.interview||0)}</div><div class="stat-l">Active</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--green)">${counts.verschickt||0}</div><div class="stat-l">Sent</div></div>
+  `;
+}
+
+function renderJobs() {
+  const el = document.getElementById('jobs-list');
+  const active = allJobs.filter(j => j.status !== 'absage' && j.status !== 'verworfen');
+  const closed = allJobs.filter(j => j.status === 'absage' || j.status === 'verworfen');
+  if (!allJobs.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><p>No jobs yet.<br>The Job Radar searches every weekday at 7:00 AM.<br>Or tap <strong>＋</strong> to add one manually.</p></div>`;
+    return;
+  }
+  let html = '';
+  GROUPS.forEach(g => {
+    const jobs = allJobs.filter(j => g.statuses.includes(j.status));
+    if (!jobs.length) return;
+    html += `<div class="group-label">${g.label} (${jobs.length})</div>`;
+    jobs.sort((a,b) => (b.gefundenAm||'').localeCompare(a.gefundenAm||'')).forEach(j => { html += jobCard(j); });
+  });
+  el.innerHTML = html || `<div class="empty"><div class="empty-icon">✅</div><p>All reviewed. The Job Radar searches every weekday at 7:00 AM for new jobs.</p></div>`;
+}
+
+function jobCard(j) {
+  const modus = MODUS_LABELS[j.modus] || j.modus;
+  const date = j.gefundenAm ? formatDate(j.gefundenAm) : '';
+  const tags = [modus, j.sprache === 'Englisch' ? 'English' : j.sprache === 'Deutsch' ? 'German' : j.sprache, date].filter(Boolean);
+  return `<div class="job-card status-${j.status}" onclick="openJobDetail('${j.id}')">
+    <div class="card-top">
+      <div>
+        <div class="card-firma">${esc(j.firma)}</div>
+        <div class="card-stelle">${esc(j.stelle)}</div>
+        <div class="card-meta">${esc(j.ort)}${modus ? ' · ' + modus : ''}</div>
+      </div>
+      <span class="pill pill-${j.status}">${STATUS_LABELS[j.status]||j.status}</span>
+    </div>
+    <div class="card-bottom">
+      ${tags.map(t=>`<span style="font-size:.75rem;color:var(--light)">${esc(t)}</span>`).join('<span style="color:var(--border)"> · </span>')}
+    </div>
+  </div>`;
+}
+
+function renderDocuments() {
+  const el = document.getElementById('docs-list');
+  const withDocs = allJobs.filter(j => j.unterlagen && j.unterlagen.length);
+  if (!withDocs.length) { el.innerHTML = `<div class="empty"><div class="empty-icon">📄</div><p>No documents uploaded yet.</p></div>`; return; }
+  el.innerHTML = withDocs.map(j => `
+    <div class="doc-group">
+      <div class="doc-group-header">
+        <div class="doc-group-firma">${esc(j.firma)} — ${esc(j.stelle)}</div>
+        <span class="pill pill-${j.status}">${STATUS_LABELS[j.status]||j.status}</span>
+      </div>
+      <div class="doc-list">
+        ${j.unterlagen.map(d => `<a class="doc-chip" href="${esc(d.url)}" target="_blank" rel="noopener">📎 ${esc(d.name)}</a>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function renderReport() {
+  const sent = allJobs.filter(j => j.verschicktAm && j.status !== 'verworfen').sort((a,b)=>(b.verschicktAm||'').localeCompare(a.verschicktAm||''));
+  const wrap = document.getElementById('report-table-wrap');
+  if (!sent.length) { wrap.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><p>No sent applications yet.</p></div>`; return; }
+  wrap.innerHTML = `<div class="report-table"><table>
+    <thead><tr><th>Nr.</th><th>Datum</th><th>Arbeitgeber</th><th>Stelle</th><th>Ort</th><th>Stand</th></tr></thead>
+    <tbody>${sent.map((j,i)=>`<tr>
+      <td>${i+1}</td>
+      <td>${formatDate(j.verschicktAm)}</td>
+      <td>${esc(j.firma)}</td>
+      <td>${esc(j.stelle)}</td>
+      <td>${esc(j.ort)}</td>
+      <td><span class="pill pill-${j.status}">${STATUS_LABELS[j.status]||j.status}</span></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+// ─── JOB DETAIL / EDIT ─────────────────────────────────────────────────────
+function openJobDetail(id) {
+  const j = allJobs.find(x => x.id === id);
+  if (!j) return;
+  editingRowIndex = j._row;
+  const modus = MODUS_LABELS[j.modus] || j.modus;
+  document.getElementById('modal-title').textContent = j.firma;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-label">Role</div>
+      <div class="detail-value" style="font-weight:600;color:var(--navy)">${esc(j.stelle)}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div><div class="detail-label">Location</div><div class="detail-value">${esc(j.ort)} ${modus ? '· '+modus : ''}</div></div>
+      <div><div class="detail-label">Language</div><div class="detail-value">${j.sprache === 'Deutsch' ? '🇩🇪 German' : j.sprache === 'Englisch' ? '🇬🇧 English' : esc(j.sprache)}</div></div>
+      <div><div class="detail-label">Source</div><div class="detail-value">${esc(j.quelle)||'—'}</div></div>
+      <div><div class="detail-label">Found</div><div class="detail-value">${j.gefundenAm ? formatDate(j.gefundenAm) : '—'}</div></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">Status</div>
+      <div class="status-options">${Object.entries(STATUS_LABELS).map(([k,v])=>`
+        <div class="status-opt ${j.status===k?'selected':''}" style="background:${STATUS_COLORS[k]};color:${STATUS_TEXT[k]}" onclick="quickStatus('${id}','${k}',this)">${v}</div>
+      `).join('')}</div>
+    </div>
+    ${j.notiz ? `<div class="detail-section"><div class="detail-label">Notes</div><div class="detail-notiz">${esc(j.notiz)}</div></div>` : ''}
+    ${j.link ? `<div class="detail-section"><a href="${esc(j.link)}" target="_blank" rel="noopener" class="doc-chip">🔗 Job listing</a></div>` : ''}
+    ${j.unterlagen&&j.unterlagen.length ? `<div class="detail-section"><div class="detail-label">Documents</div><div>${j.unterlagen.map(d=>`<a class="doc-chip" href="${esc(d.url)}" target="_blank" rel="noopener">📎 ${esc(d.name)}</a>`).join('')}</div></div>` : ''}
+    ${j.verschicktAm ? `<div style="font-size:.78rem;color:var(--light)">Sent: ${formatDate(j.verschicktAm)}</div>` : ''}
+  `;
+  document.getElementById('modal-footer').innerHTML = `
+    <button class="btn btn-ghost btn-sm" onclick="openEditForm('${id}')">✏️ Edit</button>
+    <button class="btn btn-danger btn-sm" onclick="confirmDelete('${id}')">Delete</button>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
+  `;
+  openModal();
+}
+
+async function quickStatus(id, newStatus, el) {
+  const j = allJobs.find(x => x.id === id);
+  if (!j) return;
+  el.closest('.status-options').querySelectorAll('.status-opt').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected');
+  j.status = newStatus;
+  if (newStatus === 'verschickt' && !j.verschicktAm) j.verschicktAm = todayStr();
+  j.updatedAt = nowISO();
+  try {
+    await sheetsPut(`${SHEET}!A${j._row}:Q${j._row}`, [objToRow(j)]);
+    renderAll(); showToast('Status updated');
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+function openEditForm(id) {
+  const j = allJobs.find(x => x.id === id);
+  if (!j) return;
+  document.getElementById('modal-title').textContent = 'Edit Job';
+  document.getElementById('modal-body').innerHTML = jobForm(j);
+  document.getElementById('modal-footer').innerHTML = `
+    <button class="btn btn-ghost" onclick="openJobDetail('${id}')">Cancel</button>
+    <button class="btn btn-primary" onclick="saveEdit('${id}')">Save</button>
+  `;
+}
+
+async function saveEdit(id) {
+  const j = allJobs.find(x => x.id === id);
+  if (!j) return;
+  readForm(j);
+  j.updatedAt = nowISO();
+  try {
+    await sheetsPut(`${SHEET}!A${j._row}:Q${j._row}`, [objToRow(j)]);
+    renderAll(); closeModal(); showToast('Saved');
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+function openAddModal() {
+  editingRowIndex = null;
+  document.getElementById('modal-title').textContent = 'Add Job';
+  document.getElementById('modal-body').innerHTML = jobForm({status:'pruefen',sprache:'Englisch',modus:'',gefundenAm:todayStr()});
+  document.getElementById('modal-footer').innerHTML = `
+    <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveNew()">Add</button>
+  `;
+  openModal();
+}
+
+async function saveNew() {
+  const j = {unterlagen:[], createdAt:nowISO(), updatedAt:nowISO()};
+  readForm(j);
+  if (!j.firma || !j.stelle) { showToast('Company and role are required'); return; }
+  j.id = slug(j.firma) + '-' + todayStr().replace(/-/g,'');
+  // Ensure unique id
+  if (allJobs.find(x => x.id === j.id)) j.id += '-' + Math.random().toString(36).slice(2,5);
+  if (!j.verschicktAm && j.status === 'verschickt') j.verschicktAm = todayStr();
+  try {
+    const res = await sheetsAppend(`${SHEET}!A:Q`, [objToRow(j)]);
+    await loadJobs(); closeModal(); showToast('Job added');
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+async function confirmDelete(id) {
+  if (!confirm('Delete this job?')) return;
+  const j = allJobs.find(x => x.id === id);
+  if (!j) return;
+  try {
+    await sheetsClear(`${SHEET}!A${j._row}:Q${j._row}`);
+    allJobs = allJobs.filter(x => x.id !== id);
+    renderAll(); closeModal(); showToast('Deleted');
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+// ─── FORM BUILDER ──────────────────────────────────────────────────────────
+function jobForm(j={}) {
+  return `
+  <div class="form-grid">
+    <div class="form-row"><label>Company *</label><input id="f-firma" value="${esc(j.firma||'')}" placeholder="e.g. Siemens"></div>
+    <div class="form-row"><label>Role *</label><input id="f-stelle" value="${esc(j.stelle||'')}" placeholder="e.g. Operations Manager"></div>
+  </div>
+  <div class="form-grid">
+    <div class="form-row"><label>Location</label><input id="f-ort" value="${esc(j.ort||'')}" placeholder="Berlin"></div>
+    <div class="form-row"><label>Mode</label>
+      <select id="f-modus">
+        <option value="" ${!j.modus?'selected':''}>—</option>
+        <option value="Remote" ${j.modus==='Remote'?'selected':''}>Remote</option>
+        <option value="Hybrid" ${j.modus==='Hybrid'?'selected':''}>Hybrid</option>
+        <option value="Vor Ort" ${j.modus==='Vor Ort'?'selected':''}>On-site</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-grid">
+    <div class="form-row"><label>Status</label>
+      <select id="f-status">
+        ${Object.entries(STATUS_LABELS).map(([k,v])=>`<option value="${k}" ${j.status===k?'selected':''}>${v}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-row"><label>Language</label>
+      <select id="f-sprache">
+        <option value="Englisch" ${j.sprache==='Englisch'?'selected':''}>English</option>
+        <option value="Deutsch" ${j.sprache==='Deutsch'?'selected':''}>German</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-grid">
+    <div class="form-row"><label>Found</label><input type="date" id="f-gefunden" value="${j.gefundenAm||todayStr()}"></div>
+    <div class="form-row"><label>Sent</label><input type="date" id="f-verschickt" value="${j.verschicktAm||''}"></div>
+  </div>
+  <div class="form-row"><label>Source</label><input id="f-quelle" value="${esc(j.quelle||'')}" placeholder="Jobcenter, LinkedIn…"></div>
+  <div class="form-row"><label>Link to listing</label><input id="f-link" value="${esc(j.link||'')}" placeholder="https://…"></div>
+  <div class="form-row"><label>Notes</label><textarea id="f-notiz" placeholder="Why this role fits…">${esc(j.notiz||'')}</textarea></div>
+  `;
+}
+
+function readForm(j) {
+  j.firma = v('f-firma'); j.stelle = v('f-stelle'); j.ort = v('f-ort');
+  j.modus = v('f-modus'); j.status = v('f-status'); j.sprache = v('f-sprache');
+  j.gefundenAm = v('f-gefunden'); j.verschicktAm = v('f-verschickt');
+  j.quelle = v('f-quelle'); j.link = v('f-link'); j.notiz = v('f-notiz');
+}
+
+// ─── PDF EXPORT ────────────────────────────────────────────────────────────
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ format:'a4', unit:'mm' });
+  const sent = allJobs.filter(j => j.verschicktAm && j.status !== 'verworfen')
+    .sort((a,b) => (b.verschicktAm||'').localeCompare(a.verschicktAm||''));
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text('Nachweis der Eigenbemuehungen', 14, 18);
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  doc.text(`Name: ${OWNER_NAME}`, 14, 27);
+  doc.text(`Kundennummer: ${KUNDENNR}`, 14, 33);
+  doc.text(`Erstellt: ${new Date().toLocaleDateString('de-DE')}`, 14, 39);
+
+  doc.autoTable({
+    startY: 46,
+    head: [['Nr.','Datum','Arbeitgeber','Stelle','Ort','Bewerbungsweg','Stand']],
+    body: sent.map((j,i) => [
+      i+1,
+      j.verschicktAm ? new Date(j.verschicktAm).toLocaleDateString('de-DE') : '',
+      j.firma, j.stelle, j.ort,
+      j.weg || j.quelle || '',
+      STATUS_LABELS[j.status] || j.status
+    ]),
+    styles: { fontSize:8, cellPadding:3 },
+    headStyles: { fillColor:[27,42,74], textColor:255, fontStyle:'bold' },
+    alternateRowStyles: { fillColor:[247,248,250] }
+  });
+
+  const month = MONTHS[new Date().getMonth()];
+  const year = new Date().getFullYear();
+  doc.save(`Bewerbungsnachweis_${OWNER_NAME.replace(' ','_')}_${month}${year}.pdf`);
+}
+
+// ─── MODAL ─────────────────────────────────────────────────────────────────
+function openModal() { document.getElementById('job-modal').classList.add('open'); }
+function closeModal() { document.getElementById('job-modal').classList.remove('open'); }
+document.getElementById('job-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+// ─── TABS ──────────────────────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  document.querySelector('.fab').style.display = name === 'jobs' ? 'flex' : 'none';
+}
+
+// ─── UTILS ─────────────────────────────────────────────────────────────────
+function v(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDate(s) {
+  if (!s) return '';
+  const [y,m,d] = s.split('-');
+  return `${parseInt(d)} ${MONTHS[parseInt(m)-1]} ${y}`;
+}
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  // Wait for GIS to load
+  const waitGIS = setInterval(() => {
+    if (window.google && window.google.accounts) {
+      clearInterval(waitGIS);
+      initGoogleAuth();
+    }
+  }, 100);
+});
+</script>
+</body>
+</html>
