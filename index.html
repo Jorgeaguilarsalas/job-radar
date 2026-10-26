@@ -95,8 +95,12 @@ body {
 /* ── HEADER ────────────────────────────────────────────────────────────── */
 header {
   background: var(--header-bg); color: var(--header-text);
-  padding: 0 16px; height: 52px;
-  display: flex; align-items: center; justify-content: space-between;
+  padding: env(safe-area-inset-top) 16px 0;
+  height: calc(52px + env(safe-area-inset-top));
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding-bottom: 0;
+  padding-left: calc(16px + env(safe-area-inset-left));
+  padding-right: calc(16px + env(safe-area-inset-right));
   position: sticky; top: 0; z-index: 100;
 }
 .header-brand { display: flex; align-items: center; gap: 10px; }
@@ -120,7 +124,7 @@ header {
   display: flex; background: var(--header-bg);
   border-bottom: 1px solid rgba(255,255,255,.08);
   overflow-x: auto; -webkit-overflow-scrolling: touch;
-  position: sticky; top: 52px; z-index: 90;
+  position: sticky; top: calc(52px + env(safe-area-inset-top)); z-index: 90;
 }
 .tab {
   padding: 10px 14px; text-align: center; font-size: .82rem; font-weight: 500;
