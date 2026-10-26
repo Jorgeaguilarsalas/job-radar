@@ -614,9 +614,11 @@ async function loadJobs() {
     const data = await sheetsGet(`${SHEET}!A:Q`);
     if (!data.values || data.values.length < 2) { allJobs = []; }
     else {
+      const _seen = new Set();
       allJobs = data.values.slice(1)
         .map((row, i) => rowToObj(row, i + 2))
-        .filter(j => j.id && j.status !== 'deleted' && j.status !== '');
+        .filter(j => j.id && j.status !== 'deleted' && j.status !== '')
+        .filter(j => _seen.has(j.id) ? false : _seen.add(j.id));
     }
     renderAll();
   } catch(e) {
