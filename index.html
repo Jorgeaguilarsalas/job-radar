@@ -612,12 +612,9 @@ async function loadJobs() {
     const data = await sheetsGet(`${SHEET}!A:Q`);
     if (!data.values || data.values.length < 2) { allJobs = []; }
     else {
-      const seen = new Map();
-      data.values.slice(1).forEach((row, i) => {
-        const j = rowToObj(row, i + 2);
-        if (j.id && j.status !== 'deleted' && j.status !== '') seen.set(j.id, j);
-      });
-      allJobs = Array.from(seen.values());
+      allJobs = data.values.slice(1)
+        .map((row, i) => rowToObj(row, i + 2))
+        .filter(j => j.id && j.status !== 'deleted' && j.status !== '');
     }
     renderAll();
   } catch(e) {
