@@ -143,10 +143,12 @@ header {
 .stat-lbl { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--subtle); margin-top: 3px; }
 .stat-sub { font-size: .7rem; color: var(--subtle); margin-top: 1px; }
 
-.stat-card.s-active .stat-n { color: var(--accent); }
-.stat-card.s-sent   .stat-n { color: var(--green); }
-.stat-card.s-review .stat-n { color: var(--orange); }
-.stat-card.s-closed .stat-n { color: var(--red); }
+.stat-card.s-active   .stat-n { color: var(--accent); }
+.stat-card.s-sent     .stat-n { color: var(--green); }
+.stat-card.s-review   .stat-n { color: var(--orange); }
+.stat-card.s-closed   .stat-n { color: var(--red); }
+.stat-card.s-rejected .stat-n { color: var(--red); }
+.stat-card.s-amber    .stat-n { color: var(--amber); }
 
 /* ── METRICS ROW ───────────────────────────────────────────────────────── */
 .metrics-row {
@@ -643,30 +645,31 @@ function renderStats() {
   const total    = allJobs.length;
   const active   = c.bearbeitung + c.interview + c.espera;
   const sent     = c.verschickt;
-  const review   = c.pruefen;
   const espera   = c.espera;
+  const rejected = c.absage;
 
   const af = activeFilter;
   document.getElementById('stats-area').innerHTML = `
     <div class="stats-row">
-      <div class="stat-card ${af===null?'active-filter':''}" onclick="setFilter(null)" title="Show all">
+      <div class="stat-card ${af===null?'active-filter':''}" onclick="setFilter(null)" title="Mostrar todas">
         <div class="stat-n">${total}</div>
         <div class="stat-lbl">Total</div>
+        <div class="stat-sub">candidaturas</div>
       </div>
-      <div class="stat-card s-active ${af==='active'?'active-filter':''}" onclick="setFilter('active')" title="Active processes">
+      <div class="stat-card s-active ${af==='active'?'active-filter':''}" onclick="setFilter('active')" title="Procesos activos">
         <div class="stat-n">${active}</div>
-        <div class="stat-lbl">Active</div>
-        <div class="stat-sub">in process</div>
+        <div class="stat-lbl">Activas</div>
+        <div class="stat-sub">en proceso</div>
       </div>
-      <div class="stat-card s-sent ${af==='sent'?'active-filter':''}" onclick="setFilter('sent')" title="Sent, awaiting">
-        <div class="stat-n">${sent}</div>
-        <div class="stat-lbl">Sent</div>
-        <div class="stat-sub">awaiting</div>
-      </div>
-      <div class="stat-card${espera?` s-amber`:''} ${af==='espera'?'active-filter':''}" onclick="setFilter('espera')" title="Awaiting recruiter decision">
+      <div class="stat-card${espera?' s-amber':''} ${af==='espera'?'active-filter':''}" onclick="setFilter('espera')" title="Esperando respuesta del reclutador">
         <div class="stat-n" style="${espera?'color:var(--amber)':''}">${espera}</div>
-        <div class="stat-lbl">Awaiting</div>
-        <div class="stat-sub">pending reply</div>
+        <div class="stat-lbl">Esperando</div>
+        <div class="stat-sub">decisión final</div>
+      </div>
+      <div class="stat-card s-rejected ${af==='closed'?'active-filter':''}" onclick="setFilter('closed')" title="Rechazadas">
+        <div class="stat-n">${rejected}</div>
+        <div class="stat-lbl">Rechazadas</div>
+        <div class="stat-sub">${sent ? `+${sent} sin resp.` : 'cerradas'}</div>
       </div>
     </div>`;
 }
