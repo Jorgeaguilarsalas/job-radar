@@ -206,7 +206,7 @@ textarea{resize:vertical;min-height:70px;font-family:inherit}
   <div id="tab-report" class="tab-content">
     <div class="report-header">
       <h2>Nachweis der Eigenbemühungen</h2>
-      <p>Kundennummer: <strong id="report-kundennr">922D725835</strong> · Jorge Aguilar Salas</p>
+      <p>Kundennummer: <strong id="report-kundennr" contenteditable="true" title="Click to edit" style="border-bottom:1px dashed var(--border);outline:none;cursor:text" onblur="localStorage.setItem('kundennr',this.textContent.trim())"></strong> · Jorge Aguilar Salas</p>
     </div>
     <div id="report-table-wrap"></div>
     <button class="export-btn" onclick="exportPDF()">
@@ -239,7 +239,7 @@ const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 const SHEET = 'Sheet1';
 const COLS = ['id','firma','stelle','ort','modus','quelle','link','weg','sprache','status',
               'gefundenAm','verschicktAm','datumGeschaetzt','notiz','unterlagen','createdAt','updatedAt'];
-const KUNDENNR = '922D725835';
+const KUNDENNR = localStorage.getItem('kundennr') || '';
 const OWNER_NAME = 'Jorge Aguilar Salas';
 
 // ─── STATUS / LABEL MAPS ───────────────────────────────────────────────────
@@ -700,6 +700,9 @@ function showToast(msg) {
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
+  // Restore kundennr from localStorage
+  const knEl = document.getElementById('report-kundennr');
+  if (knEl) knEl.textContent = KUNDENNR || localStorage.getItem('kundennr') || '—';
   // Wait for GIS to load
   const waitGIS = setInterval(() => {
     if (window.google && window.google.accounts) {
