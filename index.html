@@ -507,6 +507,17 @@ let tokenClient = null, accessToken = null, tokenExpiry = 0;
 let allJobs = [];
 let activeFilter = null; // null | 'review' | 'active' | 'sent' | 'closed' | 'total'
 
+// IDs that historically reached interview / espera / bearbeitung stage
+const INTERESTED_IDS = new Set([
+  'emmy-sharing-head-fleet-20260901','enghouse-trafi-bdm-20260901',
+  'fleet-product-lead-20260712','braintalents-senior-product-analyst-20260409',
+  'gardia-ops-manager-20260428','blacklane-senior-ops-manager-emea-20260427',
+  'voi-head-fleet-management-20260724','finmatch-ag-ai-ops-manager-20260728',
+  'emmy-head-fleet-operations-20260902','scout24-sales-executive-outbound-20260914',
+  'uber-mexico-implementation-20260901','uber-mexico-smb-20260901',
+  'bvg-product-owner-20261001','lanch-senior-biz-ops-20260901',
+]);
+
 // ── AUTH ────────────────────────────────────────────────────────────────────
 function initGoogleAuth() {
   tokenClient = google.accounts.oauth2.initTokenClient({
@@ -744,48 +755,102 @@ function renderInsights() {
 
   const c = computeCounts();
   const total = allJobs.length;
-
-  // Funnel
-  const sent     = allJobs.filter(j => j.verschicktAm).length;
-  const responded= allJobs.filter(j => ['bearbeitung','interview','espera','zusage','absage'].includes(j.status)).length;
-  const interview= allJobs.filter(j => ['interview','espera','zusage'].includes(j.status)).length;
-  const offers   = c.zusage;
-  const rejected = c.absage;
-  const active   = c.bearbeitung + c.interview + c.espera;
-
   const pct = (n, d) => d ? Math.round(n/d*100) : 0;
-  const respRate   = pct(responded, sent);
-  const interRate  = pct(interview, sent);
-  const offerRate  = pct(offers, sent);
+  const fmtPct = (n, d) => d ? `${Math.round(n/d*100)}%` : '—';
 
-  // Monthly breakdown (by verschicktAm)
+  // ── Funnel numbers ──────────────────────────────────────────────────────────
+  const sent      = allJobs.filter(j => j.verschicktAm).length;
+  const interestedCount = allJobs.filter(j => INTERESTED_IDS.has(j.id)).length;
+  const interview = allJobs.filter(j => ['interview','espera','zusage'].includes(j.status)).length;
+  const offers    = c.zusage;
+  const active    = c.bearbeitung + c.interview + c.espera;
+  const rejected  = c.absage;
+
+  // ── Conversion: closed = sent + not active/pruefen/bearbeitung ──────────────
+  const closed = allJobs.filter(j => ['absage','zusage'].includes(j.status));
+  const closedCount = closed.length;
+  const convRate = pct(interestedCount, closedCount + interestedCount - c.zusage);
+
+  // ── Monthly volume ──────────────────────────────────────────────────────────
   const byMonth = {};
   allJobs.forEach(j => {
     if (!j.verschicktAm) return;
-    const key = j.verschicktAm.slice(0,7); // YYYY-MM
+    const key = j.verschicktAm.slice(0,7);
     byMonth[key] = (byMonth[key]||0) + 1;
   });
   const monthKeys = Object.keys(byMonth).sort().slice(-6);
 
-  // Source breakdown
-  const bySrc = {};
-  allJobs.forEach(j => { const s = j.quelle||'Unknown'; bySrc[s] = (bySrc[s]||0)+1; });
-  const topSrcs = Object.entries(bySrc).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const maxSrc  = topSrcs[0]?.[1] || 1;
+  // ── Source conversion ───────────────────────────────────────────────────────
+  const srcData = {};
+  allJobs.forEach(j => {
+    const s = j.quelle || 'Unknown';
+    if (!srcData[s]) srcData[s] = {n:0, interested:0};
+    srcData[s].n++;
+    if (INTERESTED_IDS.has(j.id)) srcData[s].interested++;
+  });
+  const topSrcs = Object.entries(srcData).sort((a,b)=>b[1].n-a[1].n).slice(0,5);
+  const maxSrcN = topSrcs[0]?.[1].n || 1;
 
-  // Avg days open (from verschicktAm for verschickt jobs)
+  // ── Modality conversion (modus) ─────────────────────────────────────────────
+  const modiData = {};
+  allJobs.forEach(j => {
+    const m = j.modus || 'Unknown';
+    if (!modiData[m]) modiData[m] = {n:0, interested:0};
+    modiData[m].n++;
+    if (INTERESTED_IDS.has(j.id)) modiData[m].interested++;
+  });
+  const topModi = Object.entries(modiData).sort((a,b)=>b[1].n-a[1].n).slice(0,4);
+
+  // ── Language conversion (sprache) ───────────────────────────────────────────
+  const langData = {};
+  allJobs.forEach(j => {
+    const l = j.sprache || 'Unknown';
+    if (!langData[l]) langData[l] = {n:0, interested:0};
+    langData[l].n++;
+    if (INTERESTED_IDS.has(j.id)) langData[l].interested++;
+  });
+  const topLangs = Object.entries(langData).sort((a,b)=>b[1].n-a[1].n).slice(0,4);
+
+  // ── Role-type conversion (by stelle keyword) ────────────────────────────────
+  function classifyRole(stelle) {
+    const s = (stelle||'').toLowerCase();
+    if (/fleet|fuhrpark|fahrzeug/.test(s)) return 'Fleet / Fuhrpark';
+    if (/product|produkt|\bpm\b|product owner/.test(s)) return 'Product / PM';
+    if (/sales|account|business develop|vertrieb|bdm/.test(s)) return 'Sales / BD';
+    if (/strateg|biz.?ops|business.?ops/.test(s)) return 'Strategy & BizOps';
+    if (/operat|ops |betrieb|\bops\b/.test(s)) return 'Ops Manager';
+    return 'Other';
+  }
+  const roleData = {};
+  allJobs.forEach(j => {
+    const r = classifyRole(j.stelle);
+    if (!roleData[r]) roleData[r] = {n:0, interested:0};
+    roleData[r].n++;
+    if (INTERESTED_IDS.has(j.id)) roleData[r].interested++;
+  });
+  const topRoles = Object.entries(roleData)
+    .filter(([,v]) => v.n >= 3)
+    .sort((a,b)=>b[1].interested/b[1].n - a[1].interested/a[1].n);
+
+  // ── Avg days open ───────────────────────────────────────────────────────────
   const openJobs = allJobs.filter(j => j.status === 'verschickt' && j.verschicktAm);
   const today = new Date();
   const avgDays = openJobs.length
     ? Math.round(openJobs.reduce((sum,j)=>sum+(today-new Date(j.verschicktAm))/(1000*86400),0)/openJobs.length)
     : null;
-
-  // This month
   const thisMonth = todayStr().slice(0,7);
   const thisMonthCount = allJobs.filter(j => (j.verschicktAm||'').startsWith(thisMonth)).length;
 
+  // ── Helper: mini bar ────────────────────────────────────────────────────────
+  const bar = (w, color='var(--accent)') =>
+    `<div style="flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden">
+      <div style="height:100%;width:${Math.max(2,w)}%;background:${color};border-radius:3px;transition:width .3s"></div>
+    </div>`;
+
+  const convColor = (r) => r >= 25 ? '#22c55e' : r >= 10 ? 'var(--accent)' : r > 0 ? '#f59e0b' : 'var(--border-soft)';
+
   el.innerHTML = `
-  <!-- FUNNEL -->
+  <!-- ─── FUNNEL ─────────────────────────────────────────────── -->
   <div class="section-label" style="margin-bottom:8px">Conversion Funnel</div>
   <div class="funnel-card" style="margin-bottom:16px">
     <div class="funnel-steps">
@@ -797,74 +862,74 @@ function renderInsights() {
       <div class="funnel-arrow">→</div>
       <div class="funnel-step f-sent">
         <div class="funnel-step-n">${sent}</div>
-        <div class="funnel-step-lbl">Sent</div>
+        <div class="funnel-step-lbl">Enviadas</div>
         <div class="funnel-step-rate">${pct(sent,total)}%</div>
       </div>
       <div class="funnel-arrow">→</div>
       <div class="funnel-step f-response">
-        <div class="funnel-step-n">${responded}</div>
-        <div class="funnel-step-lbl">Response</div>
-        <div class="funnel-step-rate">${respRate}%</div>
+        <div class="funnel-step-n">${interestedCount}</div>
+        <div class="funnel-step-lbl">Interés</div>
+        <div class="funnel-step-rate">${pct(interestedCount,sent)}%</div>
       </div>
       <div class="funnel-arrow">→</div>
       <div class="funnel-step f-interview">
-        <div class="funnel-step-n">${interview}</div>
-        <div class="funnel-step-lbl">Interview</div>
-        <div class="funnel-step-rate">${interRate}%</div>
+        <div class="funnel-step-n">${active + offers}</div>
+        <div class="funnel-step-lbl">Activas</div>
+        <div class="funnel-step-rate">${pct(active+offers, sent)}%</div>
       </div>
       <div class="funnel-arrow">→</div>
       <div class="funnel-step f-offer">
         <div class="funnel-step-n">${offers}</div>
-        <div class="funnel-step-lbl">Offer</div>
-        <div class="funnel-step-rate">${offerRate}%</div>
+        <div class="funnel-step-lbl">Oferta</div>
+        <div class="funnel-step-rate">${pct(offers,sent)}%</div>
       </div>
     </div>
   </div>
 
-  <!-- KPI ROW -->
+  <!-- ─── KPI TILES ──────────────────────────────────────────── -->
   <div class="section-label" style="margin-bottom:8px">Key Metrics</div>
   <div class="metrics-row" style="margin-bottom:16px">
     <div class="metric-card">
-      <div class="metric-label">Response Rate</div>
-      <div class="metric-value metric-trend-${respRate>=20?'up':'flat'}">${respRate}%</div>
-      <div class="metric-sub">${responded} of ${sent} sent</div>
+      <div class="metric-label">Tasa Interés</div>
+      <div class="metric-value" style="color:${convColor(pct(interestedCount,sent))}">${pct(interestedCount,sent)}%</div>
+      <div class="metric-sub">${interestedCount} de ${sent}</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Interview Rate</div>
-      <div class="metric-value metric-trend-${interRate>=10?'up':'flat'}">${interRate}%</div>
-      <div class="metric-sub">${interview} of ${sent} sent</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-label">Active Now</div>
+      <div class="metric-label">Activas</div>
       <div class="metric-value metric-trend-up">${active}</div>
-      <div class="metric-sub">in progress</div>
+      <div class="metric-sub">en proceso</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">This Month</div>
+      <div class="metric-label">Este Mes</div>
       <div class="metric-value">${thisMonthCount}</div>
-      <div class="metric-sub">applications</div>
+      <div class="metric-sub">aplicaciones</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Avg Days Open</div>
+      <div class="metric-label">Días Espera</div>
       <div class="metric-value metric-trend-${avgDays&&avgDays>30?'down':'flat'}">${avgDays!==null?avgDays+'d':'—'}</div>
-      <div class="metric-sub">awaiting response</div>
+      <div class="metric-sub">promedio open</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Rejected</div>
+      <div class="metric-label">Rechazadas</div>
       <div class="metric-value metric-trend-flat">${rejected}</div>
       <div class="metric-sub">${pct(rejected,sent)}% of sent</div>
     </div>
+    <div class="metric-card">
+      <div class="metric-label">Total DB</div>
+      <div class="metric-value">${total}</div>
+      <div class="metric-sub">registros únicos</div>
+    </div>
   </div>
 
-  <!-- MONTHLY VOLUME -->
-  <div class="section-label" style="margin-bottom:8px">Volume — Last 6 Months</div>
+  <!-- ─── VOLUMEN MENSUAL ────────────────────────────────────── -->
+  <div class="section-label" style="margin-bottom:8px">Volumen — Últimos 6 Meses</div>
   <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r8);padding:14px 16px;margin-bottom:16px">
     ${monthKeys.length ? `
     <div style="display:flex;align-items:flex-end;gap:6px;height:80px">
       ${monthKeys.map(k => {
         const n = byMonth[k]; const max = Math.max(...monthKeys.map(x=>byMonth[x]));
         const h = Math.round((n/max)*72)+8;
-        const [y,m] = k.split('-');
+        const [,m] = k.split('-');
         return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
           <div style="font-size:.65rem;color:var(--subtle);font-weight:600">${n}</div>
           <div style="width:100%;height:${h}px;background:var(--accent);border-radius:3px 3px 0 0;opacity:.85"></div>
@@ -874,17 +939,117 @@ function renderInsights() {
     </div>` : '<div style="color:var(--subtle);font-size:.82rem">No data</div>'}
   </div>
 
-  <!-- SOURCE BREAKDOWN -->
-  <div class="section-label" style="margin-bottom:8px">Top Sources</div>
+  <!-- ─── SOURCE CONVERSION ──────────────────────────────────── -->
+  <div class="section-label" style="margin-bottom:8px">Conversión por Fuente</div>
   <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r8);padding:14px 16px;margin-bottom:16px">
-    ${topSrcs.map(([src,n]) => `
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-      <div style="font-size:.8rem;color:var(--muted);min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(src)}</div>
-      <div style="flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden">
-        <div style="height:100%;width:${Math.round(n/maxSrc*100)}%;background:var(--accent);border-radius:3px"></div>
+    <div style="display:grid;grid-template-columns:1fr;gap:10px">
+      ${topSrcs.map(([src,d]) => {
+        const r = pct(d.interested, d.n);
+        return `<div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:.78rem;color:var(--muted);font-weight:500">${esc(src)}</span>
+            <span style="font-size:.75rem;color:var(--subtle)">${d.interested}/${d.n} · <b style="color:${convColor(r)}">${r}%</b></span>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center">
+            ${bar(Math.round(d.n/maxSrcN*100))}
+            <span style="font-size:.7rem;color:var(--subtle);min-width:20px;text-align:right">${d.n}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <!-- ─── MODALITY CONVERSION ────────────────────────────────── -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+    <div>
+      <div class="section-label" style="margin-bottom:8px">Por Modalidad</div>
+      <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r8);padding:14px 16px;height:calc(100% - 28px);box-sizing:border-box">
+        ${topModi.map(([mod,d]) => {
+          const r = pct(d.interested, d.n);
+          return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:.78rem;color:var(--muted)">${esc(mod)}</span>
+            <div style="text-align:right">
+              <div style="font-size:.82rem;font-weight:700;color:${convColor(r)}">${r}%</div>
+              <div style="font-size:.68rem;color:var(--subtle)">${d.interested}/${d.n}</div>
+            </div>
+          </div>`;
+        }).join('')}
       </div>
-      <div style="font-size:.78rem;font-weight:700;color:var(--on-s);min-width:24px;text-align:right">${n}</div>
-    </div>`).join('')}
+    </div>
+    <div>
+      <div class="section-label" style="margin-bottom:8px">Por Idioma</div>
+      <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r8);padding:14px 16px;height:calc(100% - 28px);box-sizing:border-box">
+        ${topLangs.map(([lang,d]) => {
+          const r = pct(d.interested, d.n);
+          return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:.78rem;color:var(--muted)">${esc(lang)}</span>
+            <div style="text-align:right">
+              <div style="font-size:.82rem;font-weight:700;color:${convColor(r)}">${r}%</div>
+              <div style="font-size:.68rem;color:var(--subtle)">${d.interested}/${d.n}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ROLE TYPE CONVERSION ───────────────────────────────── -->
+  <div class="section-label" style="margin-bottom:8px">Conversión por Tipo de Rol</div>
+  <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r8);padding:14px 16px;margin-bottom:16px">
+    ${topRoles.map(([role,d]) => {
+      const r = pct(d.interested, d.n);
+      const maxR = pct(topRoles[0][1].interested, topRoles[0][1].n) || 1;
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:.78rem;color:var(--muted);font-weight:500">${esc(role)}</span>
+          <span style="font-size:.75rem;color:var(--subtle)">${d.interested}/${d.n} · <b style="color:${convColor(r)}">${r}%</b></span>
+        </div>
+        ${bar(maxR > 0 ? Math.round(r/maxR*100) : 0, convColor(r))}
+      </div>`;
+    }).join('')}
+  </div>
+
+  <!-- ─── KEY PATTERNS ───────────────────────────────────────── -->
+  <div class="section-label" style="margin-bottom:8px">🔍 Patrones Clave</div>
+  <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r8);padding:16px;margin-bottom:16px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:1rem;line-height:1">🎯</span>
+        <div style="font-size:.82rem;color:var(--on-s);line-height:1.45">
+          <b>Contacto directo = 5× más efectivo.</b> LinkedIn 6% vs contacto directo 32%. Priorizar búsqueda activa de hiring managers.
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:1rem;line-height:1">🏆</span>
+        <div style="font-size:.82rem;color:var(--on-s);line-height:1.45">
+          <b>Remote 100% de interés</b> en los 5 casos aplicados — señal clara de fit con empresas tech-forward.
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:1rem;line-height:1">🚗</span>
+        <div style="font-size:.82rem;color:var(--on-s);line-height:1.45">
+          <b>Fleet/Fuhrpark 25%</b> — segundo mejor rol, apalanca experiencia Nexio. Seguir priorizando.
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:1rem;line-height:1">📉</span>
+        <div style="font-size:.82rem;color:var(--on-s);line-height:1.45">
+          <b>Strategy &amp; BizOps = 0%</b> en ${roleData['Strategy & BizOps']?.n||0} aplicaciones. Revisar posicionamiento del CV para este segmento.
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:1rem;line-height:1">🌍</span>
+        <div style="font-size:.82rem;color:var(--on-s);line-height:1.45">
+          <b>Español 0%</b> en ${langData['Español']?.n||langData['Espanol']?.n||langData['español']?.n||8} aplicaciones — mercado LATAM no responde. Concentrar en DE/EN.
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:1rem;line-height:1">📊</span>
+        <div style="font-size:.82rem;color:var(--on-s);line-height:1.45">
+          <b>Tasa global: ${pct(interestedCount, sent)}%</b> (${interestedCount} interés de ${sent} enviadas). Benchmark senior ops: 8–15%. En rango.
+        </div>
+      </div>
+    </div>
   </div>`;
 }
 
