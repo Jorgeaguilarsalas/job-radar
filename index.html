@@ -10,41 +10,44 @@
 <style>
 /* ── DESIGN TOKENS ─────────────────────────────────────────────────────── */
 :root {
-  --bg:          #F3F2ED;
-  --surface:     #FFFFFF;
-  --on-s:        #0F0F0E;
-  --muted:       #5A5A56;
-  --subtle:      #9A9A94;
-  --border:      #E2E1D9;
-  --border-soft: #EEEDE7;
+  --bg:          #0D0D0D;
+  --surface:     #161616;
+  --surface2:    #1E1E1E;
+  --on-s:        #EDECE8;
+  --muted:       #9A9A94;
+  --subtle:      #6A6A64;
+  --border:      #2A2A28;
+  --border-soft: #222220;
 
-  --accent:      #1849C6;
-  --accent-dk:   #0F2F87;
-  --accent-bg:   #EEF2FF;
+  --accent:      #4F83FF;
+  --accent-dk:   #6B99FF;
+  --accent-bg:   rgba(79,131,255,.14);
 
-  --green:       #0D7A4E;
-  --green-bg:    #EDFAF3;
-  --orange:      #B85D0A;
-  --orange-bg:   #FFF6EC;
-  --red:         #C41B1B;
-  --red-bg:      #FEF2F2;
-  --purple:      #6829B8;
-  --purple-bg:   #F5F0FF;
-  --sky:         #0369A1;
-  --sky-bg:      #EFF8FF;
-  --gray:        #6B7280;
-  --gray-bg:     #F7F7F5;
+  --green:       #34D399;
+  --green-bg:    rgba(52,211,153,.13);
+  --orange:      #FB923C;
+  --orange-bg:   rgba(251,146,60,.13);
+  --red:         #F87171;
+  --red-bg:      rgba(248,113,113,.13);
+  --purple:      #A78BFA;
+  --purple-bg:   rgba(167,139,250,.13);
+  --sky:         #38BDF8;
+  --sky-bg:      rgba(56,189,248,.13);
+  --amber:       #FBBF24;
+  --amber-bg:    rgba(251,191,36,.13);
+  --gray:        #9CA3AF;
+  --gray-bg:     rgba(156,163,175,.1);
 
-  --header-bg:   #0D0D0D;
-  --header-text: #F5F5F3;
+  --header-bg:   #080808;
+  --header-text: #F0F0EC;
 
   --r4:  4px;
   --r8:  8px;
   --r12: 12px;
   --r20: 20px;
-  --shadow-xs: 0 1px 2px rgba(0,0,0,.06);
-  --shadow-sm: 0 1px 4px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.10), 0 2px 6px rgba(0,0,0,.06);
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.2);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -61,13 +64,13 @@ body {
 #signin-screen {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; min-height: 100dvh; gap: 28px;
-  padding: 24px; text-align: center; background: var(--bg);
+  padding: 24px; text-align: center; background: var(--bg); color: var(--on-s);
 }
 .signin-logo { font-size: 2.4rem; line-height: 1; }
 .signin-title { font-size: 1.4rem; font-weight: 700; letter-spacing: -.3px; color: var(--on-s); }
 .signin-sub { font-size: .875rem; color: var(--muted); max-width: 280px; line-height: 1.5; }
 .signin-btn {
-  background: var(--on-s); color: var(--header-text);
+  background: var(--accent); color: #fff;
   border: none; padding: 13px 28px; border-radius: var(--r8);
   font-size: .938rem; font-weight: 600; cursor: pointer;
   display: flex; align-items: center; gap: 10px;
@@ -128,13 +131,13 @@ header {
 @media (max-width: 400px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
 
 .stat-card {
-  background: var(--surface); border: 1.5px solid var(--border);
+  background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r8); padding: 12px 14px;
   cursor: pointer; transition: border-color .15s, box-shadow .15s;
   user-select: none; position: relative;
 }
 .stat-card:hover { border-color: var(--accent); }
-.stat-card.active-filter { border-color: var(--accent); background: var(--accent-bg); box-shadow: 0 0 0 3px rgba(24,73,198,.1); }
+.stat-card.active-filter { border-color: var(--accent); background: var(--accent-bg); box-shadow: 0 0 0 3px rgba(79,131,255,.15); }
 .stat-card.active-filter .stat-lbl { color: var(--accent); }
 .stat-n { font-size: 1.6rem; font-weight: 800; line-height: 1.1; letter-spacing: -.5px; color: var(--on-s); }
 .stat-lbl { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--subtle); margin-top: 3px; }
@@ -214,14 +217,15 @@ header {
   cursor: pointer; transition: border-color .12s, box-shadow .12s;
   border-left: 3px solid var(--border);
 }
-.job-card:hover { border-color: var(--border); box-shadow: var(--shadow-sm); border-left-color: inherit; }
+.job-card:hover { border-color: var(--surface2); box-shadow: var(--shadow-sm); border-left-color: inherit; }
 .job-card.status-pruefen     { border-left-color: var(--sky); }
 .job-card.status-bearbeitung { border-left-color: var(--orange); }
 .job-card.status-verschickt  { border-left-color: var(--green); }
 .job-card.status-interview   { border-left-color: var(--purple); }
+.job-card.status-espera      { border-left-color: var(--amber); }
 .job-card.status-zusage      { border-left-color: var(--green); }
-.job-card.status-absage      { border-left-color: var(--red); opacity: .75; }
-.job-card.status-verworfen   { border-left-color: var(--border); opacity: .6; }
+.job-card.status-absage      { border-left-color: var(--red); opacity: .6; }
+.job-card.status-verworfen   { border-left-color: var(--border); opacity: .45; }
 .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 .card-firma { font-weight: 700; font-size: .938rem; color: var(--on-s); letter-spacing: -.1px; }
 .card-stelle { font-size: .85rem; color: var(--muted); margin-top: 2px; }
@@ -235,6 +239,7 @@ header {
 .pill-bearbeitung { background: var(--orange-bg); color: var(--orange); }
 .pill-verschickt  { background: var(--green-bg);  color: var(--green); }
 .pill-interview   { background: var(--purple-bg); color: var(--purple); }
+.pill-espera      { background: var(--amber-bg);  color: var(--amber); font-weight: 700; }
 .pill-zusage      { background: var(--green-bg);  color: var(--green); font-weight: 700; }
 .pill-absage      { background: var(--red-bg);    color: var(--red); }
 .pill-verworfen   { background: var(--gray-bg);   color: var(--gray); }
@@ -250,7 +255,7 @@ header {
 .modal {
   background: var(--surface); border-radius: var(--r12);
   width: 100%; max-width: 520px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
   border: 1px solid var(--border);
 }
 .modal-header {
@@ -267,12 +272,12 @@ header {
 .form-row { margin-bottom: 11px; }
 label { display: block; font-size: .75rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; letter-spacing: .1px; }
 input, select, textarea {
-  width: 100%; padding: 8px 11px; border: 1.5px solid var(--border);
+  width: 100%; padding: 8px 11px; border: 1px solid var(--border);
   border-radius: var(--r8); font-size: .875rem; color: var(--on-s);
-  background: #fff; outline: none; transition: border-color .15s;
+  background: var(--surface2); outline: none; transition: border-color .15s;
   -webkit-appearance: none; font-family: inherit;
 }
-input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(24,73,198,.08); }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,131,255,.12); }
 textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 400px) { .form-grid { grid-template-columns: 1fr; } }
@@ -281,22 +286,22 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 .btn { padding: 8px 16px; border-radius: var(--r8); font-size: .85rem; font-weight: 600; cursor: pointer; border: none; transition: all .15s; font-family: inherit; }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-dk); }
-.btn-ghost { background: var(--bg); color: var(--muted); border: 1.5px solid var(--border); }
-.btn-ghost:hover { border-color: var(--on-s); color: var(--on-s); }
-.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid #FECACA; }
-.btn-danger:hover { background: #FEE2E2; }
+.btn-ghost { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--muted); color: var(--on-s); }
+.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,.25); }
+.btn-danger:hover { background: rgba(248,113,113,.2); }
 .btn-sm { padding: 5px 11px; font-size: .78rem; }
 
 /* ── FAB ───────────────────────────────────────────────────────────────── */
 .fab {
   position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); right: 20px;
-  background: var(--on-s); color: #fff;
+  background: var(--accent); color: #fff;
   width: 50px; height: 50px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.5rem; box-shadow: 0 4px 16px rgba(0,0,0,.25);
   cursor: pointer; border: none; z-index: 80; transition: transform .15s, background .15s;
 }
-.fab:hover { transform: scale(1.06); background: #222; }
+.fab:hover { transform: scale(1.06); background: var(--accent-dk); }
 
 /* ── STATUS SELECTOR ───────────────────────────────────────────────────── */
 .status-options { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
@@ -310,10 +315,10 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 .detail-section { margin-bottom: 14px; }
 .detail-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--subtle); margin-bottom: 3px; }
 .detail-value { font-size: .9rem; color: var(--on-s); }
-.detail-notiz { background: var(--bg); padding: 10px 12px; border-radius: var(--r8); font-size: .85rem; color: var(--muted); line-height: 1.6; }
+.detail-notiz { background: var(--surface2); padding: 10px 12px; border-radius: var(--r8); font-size: .85rem; color: var(--muted); line-height: 1.6; }
 .doc-chip {
   display: inline-flex; align-items: center; gap: 5px;
-  background: var(--bg); border: 1px solid var(--border); border-radius: var(--r20);
+  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r20);
   padding: 4px 10px 4px 8px; font-size: .78rem; color: var(--muted);
   text-decoration: none; margin: 3px 3px 3px 0; cursor: pointer; transition: border-color .12s;
 }
@@ -331,11 +336,11 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 .report-header p { font-size: .82rem; color: var(--muted); }
 .report-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r8); overflow: hidden; margin-bottom: 14px; }
 .report-table table { width: 100%; border-collapse: collapse; font-size: .8rem; }
-.report-table th { background: var(--header-bg); color: rgba(255,255,255,.9); padding: 9px 12px; text-align: left; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; }
-.report-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; color: var(--on-s); }
+.report-table th { background: var(--surface2); color: var(--muted); padding: 9px 12px; text-align: left; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; }
+.report-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--on-s); }
 .report-table tr:last-child td { border-bottom: none; }
 .export-btn {
-  background: var(--on-s); color: #fff; border: none;
+  background: var(--accent); color: #fff; border: none;
   padding: 11px 24px; border-radius: var(--r8); font-size: .875rem; font-weight: 600;
   cursor: pointer; display: flex; align-items: center; gap: 8px;
   margin: 0 auto; transition: opacity .15s;
@@ -351,7 +356,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 .toast {
   position: fixed; bottom: calc(88px + env(safe-area-inset-bottom)); left: 50%;
   transform: translateX(-50%) translateY(8px);
-  background: var(--on-s); color: #fff; padding: 9px 18px;
+  background: var(--surface2); color: var(--on-s); border: 1px solid var(--border); padding: 9px 18px;
   border-radius: var(--r8); font-size: .82rem; opacity: 0;
   transition: all .25s; pointer-events: none; z-index: 300; white-space: nowrap;
   box-shadow: var(--shadow-md);
@@ -471,13 +476,15 @@ const OWNER_NAME = 'Jorge Aguilar Salas';
 const STATUS_LABELS = {
   pruefen:'To Review', bearbeitung:'In Progress',
   verschickt:'Sent', interview:'Interview',
+  espera:'Awaiting Decision',
   zusage:'Offer ✓', absage:'Rejected', verworfen:'Dismissed'
 };
 const STATUS_COLORS = {
-  pruefen: { bg:'var(--sky-bg)',    text:'var(--sky)' },
+  pruefen:     { bg:'var(--sky-bg)',    text:'var(--sky)' },
   bearbeitung: { bg:'var(--orange-bg)', text:'var(--orange)' },
   verschickt:  { bg:'var(--green-bg)',  text:'var(--green)' },
   interview:   { bg:'var(--purple-bg)', text:'var(--purple)' },
+  espera:      { bg:'var(--amber-bg)',  text:'var(--amber)' },
   zusage:      { bg:'var(--green-bg)',  text:'var(--green)' },
   absage:      { bg:'var(--red-bg)',    text:'var(--red)' },
   verworfen:   { bg:'var(--gray-bg)',   text:'var(--gray)' },
@@ -486,10 +493,11 @@ const STATUS_COLORS = {
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 const GROUPS = [
-  { id:'review',   label:'To Review',     statuses:['pruefen'],                    cls:'s-review' },
-  { id:'active',   label:'Active',        statuses:['bearbeitung','interview'],     cls:'s-active' },
-  { id:'sent',     label:'Sent — Awaiting', statuses:['verschickt'],               cls:'s-sent'   },
-  { id:'closed',   label:'Closed',        statuses:['zusage','absage','verworfen'], cls:'s-closed' },
+  { id:'review',   label:'To Review',         statuses:['pruefen'],                          cls:'s-review' },
+  { id:'active',   label:'Active',            statuses:['bearbeitung','interview'],           cls:'s-active' },
+  { id:'espera',   label:'Awaiting Decision', statuses:['espera'],                           cls:'s-amber'  },
+  { id:'sent',     label:'Sent — Awaiting',   statuses:['verschickt'],                       cls:'s-sent'   },
+  { id:'closed',   label:'Closed',            statuses:['zusage','absage','verworfen'],       cls:'s-closed' },
 ];
 
 // ── STATE ───────────────────────────────────────────────────────────────────
@@ -604,9 +612,12 @@ async function loadJobs() {
     const data = await sheetsGet(`${SHEET}!A:Q`);
     if (!data.values || data.values.length < 2) { allJobs = []; }
     else {
-      allJobs = data.values.slice(1)
-        .map((row, i) => rowToObj(row, i + 2))
-        .filter(j => j.id && j.status !== 'deleted' && j.status !== '');
+      const seen = new Map();
+      data.values.slice(1).forEach((row, i) => {
+        const j = rowToObj(row, i + 2);
+        if (j.id && j.status !== 'deleted' && j.status !== '') seen.set(j.id, j);
+      });
+      allJobs = Array.from(seen.values());
     }
     renderAll();
   } catch(e) {
@@ -625,7 +636,7 @@ function renderAll() {
 
 // ── STATS + FILTERING ────────────────────────────────────────────────────────
 function computeCounts() {
-  const c = { pruefen:0, bearbeitung:0, verschickt:0, interview:0, zusage:0, absage:0, verworfen:0 };
+  const c = { pruefen:0, bearbeitung:0, verschickt:0, interview:0, espera:0, zusage:0, absage:0, verworfen:0 };
   allJobs.forEach(j => { if (c[j.status] !== undefined) c[j.status]++; });
   return c;
 }
@@ -633,10 +644,10 @@ function computeCounts() {
 function renderStats() {
   const c = computeCounts();
   const total    = allJobs.length;
-  const active   = c.bearbeitung + c.interview;
+  const active   = c.bearbeitung + c.interview + c.espera;
   const sent     = c.verschickt;
   const review   = c.pruefen;
-  const closed   = c.absage + c.zusage + c.verworfen;
+  const espera   = c.espera;
 
   const af = activeFilter;
   document.getElementById('stats-area').innerHTML = `
@@ -655,10 +666,10 @@ function renderStats() {
         <div class="stat-lbl">Sent</div>
         <div class="stat-sub">awaiting</div>
       </div>
-      <div class="stat-card s-review ${af==='review'?'active-filter':''}" onclick="setFilter('review')" title="To review">
-        <div class="stat-n">${review}</div>
-        <div class="stat-lbl">Review</div>
-        <div class="stat-sub">to process</div>
+      <div class="stat-card${espera?` s-amber`:''} ${af==='espera'?'active-filter':''}" onclick="setFilter('espera')" title="Awaiting recruiter decision">
+        <div class="stat-n" style="${espera?'color:var(--amber)':''}">${espera}</div>
+        <div class="stat-lbl">Awaiting</div>
+        <div class="stat-sub">pending reply</div>
       </div>
     </div>`;
 }
@@ -734,11 +745,11 @@ function renderInsights() {
 
   // Funnel
   const sent     = allJobs.filter(j => j.verschicktAm).length;
-  const responded= allJobs.filter(j => ['bearbeitung','interview','zusage','absage'].includes(j.status)).length;
-  const interview= allJobs.filter(j => ['interview','zusage'].includes(j.status)).length;
+  const responded= allJobs.filter(j => ['bearbeitung','interview','espera','zusage','absage'].includes(j.status)).length;
+  const interview= allJobs.filter(j => ['interview','espera','zusage'].includes(j.status)).length;
   const offers   = c.zusage;
   const rejected = c.absage;
-  const active   = c.bearbeitung + c.interview;
+  const active   = c.bearbeitung + c.interview + c.espera;
 
   const pct = (n, d) => d ? Math.round(n/d*100) : 0;
   const respRate   = pct(responded, sent);
