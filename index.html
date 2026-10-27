@@ -123,58 +123,128 @@ header {
   border-bottom: 1px solid rgba(255,255,255,.06);
   color: var(--header-text);
   padding-top: env(safe-area-inset-top);
-  height: calc(56px + env(safe-area-inset-top));
+  height: calc(52px + env(safe-area-inset-top));
   display: flex; align-items: flex-end; justify-content: space-between;
-  padding-bottom: 0;
-  padding-left: calc(16px + env(safe-area-inset-left));
-  padding-right: calc(16px + env(safe-area-inset-right));
   padding-bottom: 10px;
+  padding-left: calc(16px + env(safe-area-inset-left));
+  padding-right: calc(12px + env(safe-area-inset-right));
   position: sticky; top: 0; z-index: 100;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 .header-brand { display: flex; align-items: center; gap: 10px; }
 .header-brand-mark {
-  width: 30px; height: 30px;
+  width: 28px; height: 28px;
   background: linear-gradient(135deg, var(--accent) 0%, #8B5CF6 100%);
   border-radius: var(--r8); display: flex; align-items: center;
-  justify-content: center; font-size: .72rem; font-weight: 800;
+  justify-content: center; font-size: .68rem; font-weight: 800;
   letter-spacing: -.5px; color: #fff; flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(91,127,255,.3);
 }
-.header-title { font-size: 1rem; font-weight: 700; letter-spacing: -.2px; }
-.header-title small { font-weight: 400; opacity: .4; font-size: .75rem; margin-left: 6px; }
-.signout-btn {
-  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
-  color: rgba(255,255,255,.6);
-  padding: 5px 12px; border-radius: var(--r8); font-size: .78rem;
-  cursor: pointer; transition: background .15s, border-color .15s;
-  font-family: inherit;
-}
-.signout-btn:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.18); color: rgba(255,255,255,.85); }
+.header-title { font-size: .95rem; font-weight: 700; letter-spacing: -.2px; }
 
-/* ── TABS ──────────────────────────────────────────────────────────────── */
-.tabs {
-  display: flex; background: var(--header-bg);
-  border-bottom: 1px solid rgba(255,255,255,.06);
-  overflow-x: auto; -webkit-overflow-scrolling: touch;
-  position: sticky; top: calc(56px + env(safe-area-inset-top)); z-index: 90;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  scrollbar-width: none;
-}
-.tabs::-webkit-scrollbar { display: none; }
-.tab {
-  padding: 11px 16px; text-align: center; font-size: .83rem; font-weight: 500;
-  color: rgba(255,255,255,.4); border: none; background: none; cursor: pointer;
-  border-bottom: 2px solid transparent; white-space: nowrap;
-  transition: color .2s, border-color .2s; letter-spacing: .1px;
+/* user avatar button */
+.user-avatar-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, #8B5CF6 100%);
+  border: none; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: .72rem; font-weight: 800; color: #fff;
+  letter-spacing: -.3px; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(91,127,255,.25);
+  transition: transform .15s, box-shadow .15s;
   font-family: inherit;
 }
-.tab.active { color: var(--accent-lt); border-bottom-color: var(--accent); }
-.tab:hover:not(.active) { color: rgba(255,255,255,.7); }
-.tab-content { display: none; padding: 16px; max-width: 680px; margin: 0 auto; width: 100%; }
+.user-avatar-btn:hover { transform: scale(1.06); box-shadow: 0 3px 12px rgba(91,127,255,.4); }
+
+/* ── BOTTOM NAV ────────────────────────────────────────────────────────── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: var(--header-bg);
+  border-top: 1px solid rgba(255,255,255,.07);
+  display: flex; align-items: stretch;
+  padding-bottom: env(safe-area-inset-bottom);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  height: calc(60px + env(safe-area-inset-bottom));
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 4px;
+  border: none; background: none; cursor: pointer; color: rgba(255,255,255,.38);
+  font-size: .65rem; font-weight: 600; letter-spacing: .2px;
+  padding: 8px 4px 4px; transition: color .2s;
+  font-family: inherit; -webkit-tap-highlight-color: transparent;
+}
+.nav-item svg { width: 22px; height: 22px; transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+.nav-item.active { color: var(--accent-lt); }
+.nav-item.active svg { transform: scale(1.12); }
+.nav-item:not(.active):hover { color: rgba(255,255,255,.65); }
+/* active pill behind icon */
+.nav-icon-wrap {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 26px;
+}
+.nav-icon-wrap::before {
+  content: ''; position: absolute; inset: 0;
+  border-radius: 13px; background: var(--accent-bg);
+  opacity: 0; transition: opacity .2s;
+}
+.nav-item.active .nav-icon-wrap::before { opacity: 1; }
+
+/* ── TAB CONTENT ───────────────────────────────────────────────────────── */
+.tab-content {
+  display: none; padding: 14px 16px;
+  padding-bottom: calc(74px + env(safe-area-inset-bottom));
+  max-width: 680px; margin: 0 auto; width: 100%;
+}
 .tab-content.active { display: block; }
+
+/* ── PROFILE SHEET ─────────────────────────────────────────────────────── */
+.profile-sheet-bg {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.profile-sheet-bg.open { display: block; }
+.profile-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 201;
+  background: var(--surface); border-radius: var(--r16) var(--r16) 0 0;
+  border: 1px solid var(--border); border-bottom: none;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(.32,1,.32,1);
+}
+.profile-sheet-bg.open .profile-sheet { transform: translateY(0); }
+.profile-sheet-handle {
+  width: 36px; height: 4px; background: var(--border);
+  border-radius: 2px; margin: 10px auto 0;
+}
+.profile-sheet-user {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.profile-avatar-lg {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, #8B5CF6 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .88rem; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.profile-name { font-size: .938rem; font-weight: 700; color: var(--on-s); letter-spacing: -.1px; }
+.profile-email { font-size: .78rem; color: var(--muted); margin-top: 1px; }
+.profile-menu { padding: 8px 0; }
+.profile-menu-item {
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  padding: 12px 20px; border: none; background: none; cursor: pointer;
+  font-size: .88rem; color: var(--on-s); text-align: left;
+  transition: background .15s; font-family: inherit;
+}
+.profile-menu-item:hover { background: var(--surface2); }
+.profile-menu-item svg { width: 18px; height: 18px; color: var(--muted); flex-shrink: 0; }
+.profile-menu-item.danger { color: var(--red); }
+.profile-menu-item.danger svg { color: var(--red); }
+.profile-menu-sep { height: 1px; background: var(--border); margin: 4px 0; }
 
 /* ── STATS ─────────────────────────────────────────────────────────────── */
 .stats-row {
@@ -414,7 +484,7 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
 /* ── FAB ───────────────────────────────────────────────────────────────── */
 .fab {
-  position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); right: 20px;
+  position: fixed; bottom: calc(76px + env(safe-area-inset-bottom)); right: 20px;
   background: linear-gradient(135deg, var(--accent) 0%, #8B5CF6 100%);
   color: #fff; width: 56px; height: 56px; border-radius: 16px;
   display: flex; align-items: center; justify-content: center;
@@ -523,17 +593,10 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
   <header>
     <div class="header-brand">
       <div class="header-brand-mark">JR</div>
-      <div class="header-title">Job Radar <small>Jorge Aguilar · 2026</small></div>
+      <div class="header-title">Job Radar</div>
     </div>
-    <button class="signout-btn" onclick="signOut()">Sign out</button>
+    <button class="user-avatar-btn" id="user-avatar-btn" onclick="openProfileSheet()" title="Profile">JA</button>
   </header>
-
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('jobs',this)">Jobs</button>
-    <button class="tab" onclick="switchTab('insights',this)">Insights</button>
-    <button class="tab" onclick="switchTab('documents',this)">Documents</button>
-    <button class="tab" onclick="switchTab('report',this)">Report</button>
-  </div>
 
   <!-- JOBS TAB -->
   <div id="tab-jobs" class="tab-content active">
@@ -569,7 +632,68 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <button class="export-btn" onclick="exportPDF()">⬇ PDF herunterladen</button>
   </div>
 
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-jobs" onclick="switchTab('jobs',this)">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+        </svg>
+      </div>
+      Jobs
+    </button>
+    <button class="nav-item" id="nav-insights" onclick="switchTab('insights',this)">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+      </div>
+      Insights
+    </button>
+    <button class="nav-item" id="nav-documents" onclick="switchTab('documents',this)">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+        </svg>
+      </div>
+      Docs
+    </button>
+    <button class="nav-item" id="nav-report" onclick="switchTab('report',this)">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/>
+        </svg>
+      </div>
+      Report
+    </button>
+  </nav>
+
   <button class="fab" id="fab-btn" onclick="openAddModal()" title="Add job">＋</button>
+</div>
+
+<!-- PROFILE SHEET -->
+<div class="profile-sheet-bg" id="profile-sheet-bg" onclick="closeProfileSheet()">
+  <div class="profile-sheet" onclick="event.stopPropagation()">
+    <div class="profile-sheet-handle"></div>
+    <div class="profile-sheet-user">
+      <div class="profile-avatar-lg" id="profile-avatar-lg">JA</div>
+      <div>
+        <div class="profile-name">Jorge Aguilar Salas</div>
+        <div class="profile-email" id="profile-email">—</div>
+      </div>
+    </div>
+    <div class="profile-menu">
+      <button class="profile-menu-item" onclick="closeProfileSheet()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M20 12h2M2 12h2M12 20v2M12 2v2"/></svg>
+        Settings
+      </button>
+      <div class="profile-menu-sep"></div>
+      <button class="profile-menu-item danger" onclick="closeProfileSheet();signOut()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- JOB MODAL -->
@@ -646,11 +770,19 @@ function initGoogleAuth() {
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
-    callback: (resp) => {
+    callback: async (resp) => {
       if (resp.error) { showSigninError(resp.error_description || resp.error); return; }
       accessToken = resp.access_token;
       tokenExpiry = Date.now() + (resp.expires_in - 60) * 1000;
-      onSignedIn();
+      let email = '';
+      try {
+        const ui = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: 'Bearer ' + accessToken }
+        });
+        const ud = await ui.json();
+        email = ud.email || '';
+      } catch(e) {}
+      onSignedIn(email);
     }
   });
 }
@@ -682,9 +814,13 @@ function showSigninError(msg) {
   const el = document.getElementById('signin-error');
   el.textContent = msg; el.style.display = 'block';
 }
-async function onSignedIn() {
+async function onSignedIn(userEmail) {
   document.getElementById('signin-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
+  if (userEmail) {
+    const emailEl = document.getElementById('profile-email');
+    if (emailEl) emailEl.textContent = userEmail;
+  }
   await loadJobs();
 }
 
@@ -1440,10 +1576,18 @@ document.getElementById('job-modal').addEventListener('click', e => { if(e.targe
 // ── TABS ──────────────────────────────────────────────────────────────────────
 function switchTab(name, btn) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-  btn.classList.add('active');
+  (btn || document.getElementById('nav-'+name)).classList.add('active');
   document.getElementById('fab-btn').style.display = name === 'jobs' ? 'flex' : 'none';
+}
+
+// ── PROFILE SHEET ─────────────────────────────────────────────────────────────
+function openProfileSheet() {
+  document.getElementById('profile-sheet-bg').classList.add('open');
+}
+function closeProfileSheet() {
+  document.getElementById('profile-sheet-bg').classList.remove('open');
 }
 
 // ── UTILS ──────────────────────────────────────────────────────────────────────
