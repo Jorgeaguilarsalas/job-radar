@@ -168,7 +168,7 @@ Until new columns are approved, the same fields are appended to `notiz` as one m
 
 | Copy | Location | Status |
 |---|---|---|
-| GitHub | `docs/pec/PEC-04_Dispatch_Baseline_2026-10-28.md` — see commit link in the Drive copy | recorded at publish time |
-| Google Drive | `PROJECTS / Dispatch / PEC / PEC-04_Dispatch_Baseline_2026-10-28` | recorded at publish time |
+| GitHub | https://github.com/Jorgeaguilarsalas/job-radar/blob/main/docs/pec/PEC-04_Dispatch_Baseline_2026-10-28.md (archived in commit `5218864`) | created |
+| Google Drive | PROJECTS / Dispatch / PEC / PEC-04_Dispatch_Baseline_2026-10-28 — https://docs.google.com/document/d/1kkCyfi7VN7mFUVIHrIp24C9HhmORc31OwN3EhEASWJk/edit (folder https://drive.google.com/drive/folders/1E0Htlc85Y_dPxfKQ90pmp6SmUlbFhTtI) | created |
 
-Sync status and URLs are verified after both writes and stated in the chat reply and in the Drive copy's header.
+Sync status: SYNCED — both copies created on 28.10.2026 with identical content (report v1.0) and verified by reading them back.
