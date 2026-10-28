@@ -1,7 +1,7 @@
 {
-  "name": "Job Radar",
-  "short_name": "Job Radar",
-  "description": "Job application tracker — Jorge Aguilar",
+  "name": "Dispatch",
+  "short_name": "Dispatch",
+  "description": "Dispatch — application pipeline, evaluation and documents · Jorge Aguilar",
   "start_url": "/job-radar/",
   "scope": "/job-radar/",
   "display": "standalone",
