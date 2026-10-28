@@ -284,6 +284,81 @@ header {
 .stat-card.s-rejected .stat-n { color: var(--red); }
 .stat-card.s-amber    .stat-n { color: var(--amber); }
 
+/* ── HOME ──────────────────────────────────────────────────────────────── */
+.home-hello { font-size: 1.35rem; font-weight: 800; letter-spacing: -.5px; margin: 2px 0 2px; }
+.home-sub { font-size: .82rem; color: var(--muted); margin-bottom: 16px; }
+.home-section {
+  font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
+  color: var(--subtle); margin: 18px 0 8px; display: flex; justify-content: space-between; align-items: baseline;
+}
+.home-section:first-of-type { margin-top: 0; }
+.home-section .home-section-hint { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: .72rem; }
+.status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+@media (min-width: 560px) { .status-grid { grid-template-columns: repeat(4, 1fr); } }
+.status-tile {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r12);
+  padding: 13px 14px 12px; cursor: pointer; position: relative; overflow: hidden;
+  text-align: left; font-family: inherit; color: var(--on-s);
+  transition: border-color .2s, transform .15s, box-shadow .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.status-tile::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--tile-c); }
+.status-tile:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); border-color: var(--tile-c); }
+.status-tile:active { transform: scale(.98); }
+.status-tile.is-empty { opacity: .45; }
+.tile-n { font-size: 1.75rem; font-weight: 800; letter-spacing: -.7px; line-height: 1.05; color: var(--tile-c); }
+.tile-lbl { font-size: .78rem; font-weight: 600; margin-top: 4px; }
+.tile-sub { font-size: .68rem; color: var(--subtle); margin-top: 1px; }
+.tile-arrow { position: absolute; right: 12px; top: 12px; color: var(--subtle); font-size: .8rem; }
+.attention-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r12);
+  overflow: hidden;
+}
+.attention-row {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer;
+  border-bottom: 1px solid var(--border-soft); transition: background .15s;
+}
+.attention-row:last-child { border-bottom: none; }
+.attention-row:hover { background: var(--surface2); }
+.attention-badge {
+  min-width: 34px; height: 34px; border-radius: var(--r8); display: flex; align-items: center;
+  justify-content: center; font-weight: 800; font-size: .95rem; flex-shrink: 0;
+}
+.attention-text { flex: 1; min-width: 0; }
+.attention-title { font-size: .86rem; font-weight: 600; }
+.attention-desc { font-size: .74rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.attention-go { color: var(--subtle); font-size: .9rem; }
+.recent-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border-soft); cursor: pointer; }
+.recent-row:last-child { border-bottom: none; }
+.recent-row:hover { background: var(--surface2); }
+.recent-main { flex: 1; min-width: 0; }
+.recent-firma { font-size: .84rem; font-weight: 600; }
+.recent-stelle { font-size: .72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-date { font-size: .68rem; color: var(--subtle); white-space: nowrap; }
+
+/* ── STATUS CHIP BAR (Jobs tab) ────────────────────────────────────────── */
+.status-chips {
+  display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 10px; margin-bottom: 4px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.status-chips::-webkit-scrollbar { display: none; }
+.status-chip {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--muted); font-size: .78rem; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all .15s; -webkit-tap-highlight-color: transparent;
+}
+.status-chip .chip-n {
+  font-size: .7rem; font-weight: 700; padding: 1px 7px; border-radius: 999px;
+  background: var(--surface3); color: var(--on-s);
+}
+.status-chip.selected { background: var(--chip-bg); border-color: var(--chip-c); color: var(--chip-c); }
+.status-chip.selected .chip-n { background: var(--chip-c); color: var(--bg); }
+.status-chip.is-empty { opacity: .5; }
+.list-head { display: flex; justify-content: space-between; align-items: baseline; margin: 2px 2px 10px; }
+.list-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -.3px; }
+.list-meta { font-size: .74rem; color: var(--subtle); }
+
 /* ── METRICS ROW ───────────────────────────────────────────────────────── */
 .metrics-row {
   display: grid; grid-template-columns: repeat(3, 1fr);
@@ -598,8 +673,15 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
     <button class="user-avatar-btn" id="user-avatar-btn" onclick="openProfileSheet()" title="Profile">JA</button>
   </header>
 
+  <!-- HOME TAB -->
+  <div id="tab-home" class="tab-content active">
+    <div id="home-content">
+      <div class="loading"><div class="spinner"></div> Loading…</div>
+    </div>
+  </div>
+
   <!-- JOBS TAB -->
-  <div id="tab-jobs" class="tab-content active">
+  <div id="tab-jobs" class="tab-content">
     <div id="stats-area"></div>
     <div id="filter-indicator" style="display:none"></div>
     <div id="jobs-list">
@@ -634,7 +716,15 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <button class="nav-item active" id="nav-jobs" onclick="switchTab('jobs',this)">
+    <button class="nav-item active" id="nav-home" onclick="switchTab('home',this)">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>
+        </svg>
+      </div>
+      Home
+    </button>
+    <button class="nav-item" id="nav-jobs" onclick="switchTab('jobs',this)">
       <div class="nav-icon-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
@@ -740,6 +830,18 @@ const STATUS_COLORS = {
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+// Pipeline order + accent colour per status (Home tiles and Jobs chips)
+const STATUS_ORDER = ['pruefen','bearbeitung','verschickt','interview','espera','zusage','absage','verworfen'];
+const STATUS_ACCENT = {
+  pruefen:'--sky', bearbeitung:'--orange', verschickt:'--green', interview:'--purple',
+  espera:'--amber', zusage:'--green', absage:'--red', verworfen:'--gray'
+};
+const STATUS_HINT = {
+  pruefen:'to evaluate', bearbeitung:'docs in progress', verschickt:'awaiting reply',
+  interview:'in interviews', espera:'final decision', zusage:'offers', absage:'closed', verworfen:'not pursued'
+};
+const FOLLOWUP_DAYS = 14; // "Sent" with no reply after this many days → follow-up candidate
+
 const GROUPS = [
   { id:'review',   label:'To Review',         statuses:['pruefen'],                          cls:'s-review' },
   { id:'active',   label:'Active',            statuses:['bearbeitung','interview'],           cls:'s-active' },
@@ -751,7 +853,7 @@ const GROUPS = [
 // ── STATE ───────────────────────────────────────────────────────────────────
 let tokenClient = null, accessToken = null, tokenExpiry = 0;
 let allJobs = [];
-let activeFilter = null; // null | 'review' | 'active' | 'sent' | 'closed' | 'total'
+let activeFilter = null; // null = auto-pick | 'all' | 'followup' | a status key
 let activeTagFilter = null; // null | { field, value, label }
 
 // IDs that historically reached interview / espera / bearbeitung stage
@@ -897,6 +999,7 @@ async function loadJobs() {
 }
 
 function renderAll() {
+  renderHome();
   renderStats();
   renderFilterIndicator();
   renderJobs();
@@ -907,47 +1010,137 @@ function renderAll() {
 
 // ── STATS + FILTERING ────────────────────────────────────────────────────────
 function computeCounts() {
-  const c = { pruefen:0, bearbeitung:0, verschickt:0, interview:0, espera:0, zusage:0, absage:0, verworfen:0 };
-  allJobs.forEach(j => { if (c[j.status] !== undefined) c[j.status]++; });
+  const c = {};
+  STATUS_ORDER.forEach(s => c[s] = 0);
+  allJobs.forEach(j => { c[j.status] = (c[j.status] || 0) + 1; });
   return c;
 }
+// Statuses present in the sheet that the app doesn't know (e.g. typos) — shown so nothing hides
+function unknownStatuses(c) {
+  return Object.keys(c).filter(s => !STATUS_ORDER.includes(s) && c[s] > 0);
+}
+function daysSince(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr.slice(0,10) + 'T00:00:00');
+  if (isNaN(d)) return null;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+function followupJobs() {
+  return allJobs.filter(j => j.status === 'verschickt' && (daysSince(j.verschicktAm || j.gefundenAm) ?? 0) >= FOLLOWUP_DAYS);
+}
+function statusLabel(s) { return STATUS_LABELS[s] || s; }
+function accentVar(s) { return STATUS_ACCENT[s] || '--gray'; }
 
-function renderStats() {
+// ── HOME ─────────────────────────────────────────────────────────────────────
+function renderHome() {
+  const el = document.getElementById('home-content');
+  if (!el) return;
   const c = computeCounts();
-  const total    = allJobs.length;
-  const active   = c.bearbeitung + c.interview + c.espera;
-  const sent     = c.verschickt;
-  const espera   = c.espera;
-  const rejected = c.absage;
+  const total = allJobs.length;
+  const open = c.pruefen + c.bearbeitung + c.verschickt + c.interview + c.espera;
+  const inPlay = c.bearbeitung + c.interview + c.espera;
+  const now = new Date();
+  const thisMonth = now.toISOString().slice(0,7);
+  const sentThisMonth = allJobs.filter(j => (j.verschicktAm||'').startsWith(thisMonth)).length;
+  const sentLast7 = allJobs.filter(j => { const d = daysSince(j.verschicktAm); return d !== null && d <= 6; }).length;
+  const hour = now.getHours();
+  const hello = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-  const af = activeFilter;
-  document.getElementById('stats-area').innerHTML = `
-    <div class="stats-row">
-      <div class="stat-card ${af===null?'active-filter':''}" onclick="setFilter(null)" title="Mostrar todas">
-        <div class="stat-n">${total}</div>
-        <div class="stat-lbl">Total</div>
-        <div class="stat-sub">candidaturas</div>
-      </div>
-      <div class="stat-card s-active ${af==='active'?'active-filter':''}" onclick="setFilter('active')" title="Procesos activos">
-        <div class="stat-n">${active}</div>
-        <div class="stat-lbl">Activas</div>
-        <div class="stat-sub">en proceso</div>
-      </div>
-      <div class="stat-card${espera?' s-amber':''} ${af==='espera'?'active-filter':''}" onclick="setFilter('espera')" title="Esperando respuesta del reclutador">
-        <div class="stat-n" style="${espera?'color:var(--amber)':''}">${espera}</div>
-        <div class="stat-lbl">Esperando</div>
-        <div class="stat-sub">decisión final</div>
-      </div>
-      <div class="stat-card s-rejected ${af==='closed'?'active-filter':''}" onclick="setFilter('closed')" title="Rechazadas">
-        <div class="stat-n">${rejected}</div>
-        <div class="stat-lbl">Rechazadas</div>
-        <div class="stat-sub">${sent ? `+${sent} sin resp.` : 'cerradas'}</div>
-      </div>
-    </div>`;
+  const tiles = [...STATUS_ORDER, ...unknownStatuses(c)].map(s => {
+    const n = c[s] || 0;
+    const known = STATUS_ORDER.includes(s);
+    return `<button class="status-tile${n ? '' : ' is-empty'}" style="--tile-c:var(${accentVar(s)})" onclick="goToStatus('${s}')">
+      <span class="tile-arrow">›</span>
+      <div class="tile-n">${n}</div>
+      <div class="tile-lbl">${esc(statusLabel(s))}</div>
+      <div class="tile-sub">${known ? STATUS_HINT[s] : 'unknown status — fix in sheet'}</div>
+    </button>`;
+  }).join('');
+
+  // Needs attention
+  const fu = followupJobs();
+  const attention = [];
+  if (c.pruefen) attention.push({ n:c.pruefen, c:'--sky', title:'Roles to review',
+    desc: allJobs.filter(j=>j.status==='pruefen').map(j=>j.firma).slice(0,4).join(' · '), go:"goToStatus('pruefen')" });
+  if (c.bearbeitung) attention.push({ n:c.bearbeitung, c:'--orange', title:'Applications to finish',
+    desc: allJobs.filter(j=>j.status==='bearbeitung').map(j=>j.firma).slice(0,4).join(' · '), go:"goToStatus('bearbeitung')" });
+  if (fu.length) attention.push({ n:fu.length, c:'--amber', title:`No reply after ${FOLLOWUP_DAYS}+ days`,
+    desc: 'Follow up or close: ' + fu.sort((a,b)=>(a.verschicktAm||'').localeCompare(b.verschicktAm||'')).map(j=>j.firma).slice(0,4).join(' · '),
+    go:"goToStatus('followup')" });
+  if (c.interview) attention.push({ n:c.interview, c:'--purple', title:'Interviews in progress',
+    desc: allJobs.filter(j=>j.status==='interview').map(j=>j.firma).slice(0,4).join(' · '), go:"goToStatus('interview')" });
+  const attentionHtml = attention.length
+    ? `<div class="attention-card">${attention.map(a => `
+        <div class="attention-row" onclick="${a.go}">
+          <div class="attention-badge" style="background:var(${a.c}-bg);color:var(${a.c})">${a.n}</div>
+          <div class="attention-text"><div class="attention-title">${a.title}</div><div class="attention-desc">${esc(a.desc)}</div></div>
+          <span class="attention-go">›</span>
+        </div>`).join('')}</div>`
+    : `<div class="attention-card"><div class="attention-row" style="cursor:default"><div class="attention-text"><div class="attention-title">All clear</div><div class="attention-desc">Nothing waiting on you right now.</div></div></div></div>`;
+
+  // Recent activity
+  const recent = [...allJobs]
+    .sort((a,b) => (b.updatedAt||b.createdAt||b.gefundenAm||'').localeCompare(a.updatedAt||a.createdAt||a.gefundenAm||''))
+    .slice(0,5);
+  const recentHtml = recent.length ? `<div class="attention-card">${recent.map(j => `
+      <div class="recent-row" onclick="openJobDetail('${j.id}')">
+        <div class="recent-main"><div class="recent-firma">${esc(j.firma)}</div><div class="recent-stelle">${esc(j.stelle)}</div></div>
+        <span class="pill pill-${j.status}">${esc(statusLabel(j.status))}</span>
+      </div>`).join('')}</div>` : '';
+
+  el.innerHTML = `
+    <div class="home-hello">${hello}, Jorge</div>
+    <div class="home-sub">${total} applications · ${open} open · ${inPlay} in play · ${sentLast7} sent this week · ${sentThisMonth} this month</div>
+    <div class="home-section">By status <span class="home-section-hint">tap to open the list</span></div>
+    <div class="status-grid">${tiles}</div>
+    <div class="home-section">Needs attention</div>
+    ${attentionHtml}
+    ${recentHtml ? `<div class="home-section">Recently updated</div>${recentHtml}` : ''}
+  `;
 }
 
-function setFilter(groupId) {
-  activeFilter = groupId;
+function goToStatus(key) {
+  activeFilter = key;
+  activeTagFilter = null;
+  renderStats();
+  renderFilterIndicator();
+  renderJobs();
+  switchTab('jobs');
+  window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+}
+
+// Default list when opening Jobs without a choice: first non-empty actionable status
+function resolveFilter() {
+  if (activeFilter) return activeFilter;
+  const c = computeCounts();
+  return ['pruefen','bearbeitung','interview','espera','verschickt'].find(s => c[s]) || 'all';
+}
+
+// ── JOBS TAB: status chip bar ────────────────────────────────────────────────
+function renderStats() {
+  const c = computeCounts();
+  const sel = resolveFilter();
+  const fuN = followupJobs().length;
+  const chip = (key, label, n, accent) => `
+    <button class="status-chip${sel===key?' selected':''}${n?'':' is-empty'}"
+      style="--chip-c:var(${accent});--chip-bg:var(${accent}-bg)" onclick="setFilter('${key}')">
+      ${esc(label)} <span class="chip-n">${n}</span>
+    </button>`;
+  const chips = [
+    chip('all', 'All', allJobs.length, '--accent'),
+    ...[...STATUS_ORDER, ...unknownStatuses(c)].map(s => chip(s, statusLabel(s), c[s]||0, accentVar(s))),
+  ];
+  // follow-up chip sits right after "Sent"
+  const sentIdx = 1 + STATUS_ORDER.indexOf('verschickt');
+  chips.splice(sentIdx + 1, 0, chip('followup', `No reply ${FOLLOWUP_DAYS}d+`, fuN, '--amber'));
+  document.getElementById('stats-area').innerHTML = `<div class="status-chips" id="status-chips">${chips.join('')}</div>`;
+  // keep the selected chip visible
+  const selEl = document.querySelector('#status-chips .status-chip.selected');
+  if (selEl) selEl.scrollIntoView({ block:'nearest', inline:'center' });
+}
+
+function setFilter(key) {
+  activeFilter = key || 'all';
   renderStats();
   renderFilterIndicator();
   renderJobs();
@@ -964,25 +1157,27 @@ function setTagFilter(field, value, label) {
 }
 
 function clearAllFilters() {
-  activeFilter = null;
   activeTagFilter = null;
-  renderStats();
   renderFilterIndicator();
   renderJobs();
 }
 
+// Only tag filters need a banner now — the status is shown by the chip bar
 function renderFilterIndicator() {
   const el = document.getElementById('filter-indicator');
-  const hasStatus = activeFilter !== null;
-  const hasTag = activeTagFilter !== null;
-  if (!hasStatus && !hasTag) { el.style.display = 'none'; return; }
-  const g = hasStatus ? GROUPS.find(x => x.id === activeFilter) : null;
+  if (!activeTagFilter) { el.style.display = 'none'; return; }
   el.style.display = 'flex';
-  const chips = [];
-  if (hasStatus) chips.push(`<span class="filter-chip">${g ? g.label : activeFilter} <button class="filter-chip-x" onclick="setFilter(null)">✕</button></span>`);
-  if (hasTag) chips.push(`<span class="filter-chip filter-chip-tag">${esc(activeTagFilter.label)} <button class="filter-chip-x" onclick="setTagFilter('${activeTagFilter.field}','${activeTagFilter.value}','${activeTagFilter.label}')">✕</button></span>`);
-  const clearAll = (hasStatus && hasTag) ? `<button class="filter-clear" onclick="clearAllFilters()">Clear all</button>` : '';
-  el.innerHTML = `<div class="filter-bar">${chips.join('')}${clearAll}</div>`;
+  el.innerHTML = `<div class="filter-bar"><span class="filter-chip filter-chip-tag">${esc(activeTagFilter.label)} <button class="filter-chip-x" onclick="clearAllFilters()">✕</button></span></div>`;
+}
+
+function filteredJobs(key) {
+  let jobs;
+  if (key === 'all') jobs = [...allJobs];
+  else if (key === 'followup') jobs = followupJobs();
+  else jobs = allJobs.filter(j => j.status === key);
+  if (activeTagFilter) jobs = jobs.filter(j => j[activeTagFilter.field] === activeTagFilter.value);
+  if (key === 'followup') return jobs.sort((a,b) => (a.verschicktAm||'').localeCompare(b.verschicktAm||''));
+  return jobs.sort((a,b) => (b.verschicktAm||b.gefundenAm||'').localeCompare(a.verschicktAm||a.gefundenAm||''));
 }
 
 function renderJobs() {
@@ -991,25 +1186,27 @@ function renderJobs() {
     el.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><p>No jobs yet.<br>Tap <strong>＋</strong> to add one.</p></div>`;
     return;
   }
+  const key = resolveFilter();
+  const jobs = filteredJobs(key);
+  const title = key === 'all' ? 'All applications'
+    : key === 'followup' ? `Sent, no reply after ${FOLLOWUP_DAYS}+ days`
+    : statusLabel(key);
+  const meta = key === 'followup' ? 'oldest first' : 'newest first';
 
-  // Determine which groups to show
-  const groupsToShow = activeFilter
-    ? GROUPS.filter(g => g.id === activeFilter)
-    : GROUPS;
-
-  let html = '';
-  groupsToShow.forEach(g => {
-    let jobs = allJobs.filter(j => g.statuses.includes(j.status));
-    if (activeTagFilter) {
-      jobs = jobs.filter(j => j[activeTagFilter.field] === activeTagFilter.value);
-    }
-    jobs = jobs.sort((a,b) => (b.gefundenAm||'').localeCompare(a.gefundenAm||''));
-    if (!jobs.length) return;
-    html += `<div class="group-label">${g.label}<span class="group-count">${jobs.length}</span></div>`;
+  let html = `<div class="list-head"><div class="list-title">${esc(title)}</div><div class="list-meta">${jobs.length} · ${meta}</div></div>`;
+  if (key === 'all') {
+    // "All" keeps a light grouping by status so it stays readable
+    [...STATUS_ORDER, ...unknownStatuses(computeCounts())].forEach(s => {
+      const g = jobs.filter(j => j.status === s);
+      if (!g.length) return;
+      html += `<div class="group-label">${esc(statusLabel(s))}<span class="group-count">${g.length}</span></div>`;
+      g.forEach(j => { html += jobCard(j); });
+    });
+  } else {
     jobs.forEach(j => { html += jobCard(j); });
-  });
-
-  el.innerHTML = html || `<div class="empty"><div class="empty-icon">✅</div><p>Nothing to show for this filter.</p></div>`;
+  }
+  el.innerHTML = jobs.length ? html
+    : html + `<div class="empty"><div class="empty-icon">✅</div><p>Nothing here right now.</p></div>`;
 }
 
 function jobCard(j) {
@@ -1579,7 +1776,9 @@ function switchTab(name, btn) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   (btn || document.getElementById('nav-'+name)).classList.add('active');
-  document.getElementById('fab-btn').style.display = name === 'jobs' ? 'flex' : 'none';
+  document.getElementById('fab-btn').style.display = (name === 'jobs' || name === 'home') ? 'flex' : 'none';
+  if (name === 'jobs') { renderStats(); renderJobs(); }
+  if (name === 'home') renderHome();
 }
 
 // ── PROFILE SHEET ─────────────────────────────────────────────────────────────
